@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Powered Student Management System</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,Segoe UI,Arial,sans-serif;background:#f4f7fb;color:#172033;min-height:100vh}
+.app{display:flex;min-height:100vh}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:250px;background:#111827;color:#fff;padding:22px 15px;z-index:10}
+.brand{display:flex;align-items:center;gap:11px;padding:7px 12px 28px}
+.logo{width:40px;height:40px;border-radius:11px;background:#2563eb;display:grid;place-items:center;font-size:20px;font-weight:800}
+.brand strong{display:block;font-size:15px;line-height:1.25}
+.brand small{display:block;color:#94a3b8;font-size:11px;margin-top:3px}
+.nav{display:flex;flex-direction:column;gap:5px}
+.nav a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;color:#cbd5e1;text-decoration:none;font-size:14px;font-weight:600}
+.nav a:hover,.nav a.active{background:#2563eb;color:#fff}
+.nav .spacer{height:8px}
+.main{margin-left:250px;width:calc(100% - 250px);padding:0 30px 35px}
+.topbar{height:74px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5e7eb;background:#fff;margin:0 -30px 28px;padding:0 30px}
+.topbar-left{font-size:13px;color:#64748b}
+.topbar-left strong{color:#172033;font-size:15px}
+.user-area{display:flex;align-items:center;gap:18px}
+.icon-btn{font-size:20px;color:#64748b}
+.user{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px}
+.avatar{width:35px;height:35px;border-radius:50%;background:#dbeafe;color:#1d4ed8;display:grid;place-items:center}
+.header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px}
+.eyebrow{font-size:11px;letter-spacing:1.1px;font-weight:800;color:#64748b}
+h1{font-size:30px;margin-top:5px}
+.subtitle{color:#64748b;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:15px;box-shadow:0 5px 18px rgba(15,23,42,.05)}
+.stat{padding:20px;display:flex;justify-content:space-between;align-items:center}
+.stat-label{font-size:13px;color:#64748b}
+.stat-value{font-size:25px;font-weight:800;margin-top:7px}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:#eff6ff;color:#2563eb}
+.content-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,.8fr);gap:20px}
+.panel{padding:21px}
+.panel h2{font-size:18px;margin-bottom:5px}
+.panel-sub{color:#64748b;font-size:13px;margin-bottom:18px}
+.progress{height:10px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:15px 0}
+.progress span{display:block;height:100%;width:56%;background:#2563eb;border-radius:99px}
+.info-row{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #eef2f7;font-size:14px}
+.info-row:last-child{border-bottom:0}
+.status{padding:5px 9px;border-radius:99px;font-size:11px;font-weight:800}
+.verified{background:#dcfce7;color:#166534}
+.pending{background:#fef3c7;color:#92400e}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:580px}
+th,td{padding:13px 10px;text-align:left;border-bottom:1px solid #eef2f7;font-size:13px}
+th{color:#64748b;font-size:11px;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:9px;padding:11px 15px;font-weight:700;cursor:pointer;text-decoration:none}
+.primary{background:#2563eb;color:#fff}
+.primary:hover{background:#1d4ed8}
+.ai{position:fixed;right:28px;bottom:25px;background:#111827;color:#fff;border-radius:14px;padding:13px 17px;box-shadow:0 12px 30px rgba(15,23,42,.22);font-weight:800;cursor:pointer;z-index:20}
+.login-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:
+        linear-gradient(rgba(15,23,42,.55), rgba(15,23,42,.55)),
+        url('login-bg.jpg') center center / cover no-repeat;
+    z-index:9999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+.login-overlay.show{display:flex}
+.login-card{width:420px;max-width:100%;background:#fff;border-radius:18px;padding:28px;box-shadow:0 25px 70px rgba(15,23,42,.25)}
+.login-card h2{font-size:24px;margin-bottom:6px}
+.login-card .subtitle{margin-bottom:20px}
+.form-label{display:block;font-size:13px;font-weight:700;margin:15px 0 7px}
+.input{width:100%;padding:12px 13px;border:1px solid #d7dee9;border-radius:9px;outline:0}
+.input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.login-btn{width:100%;border:0;background:#2563eb;color:#fff;border-radius:9px;padding:12px;font-weight:800;margin-top:20px;cursor:pointer}
+.error-message{display:none;color:#b91c1c;background:#fee2e2;padding:10px;border-radius:8px;font-size:13px;margin-bottom:12px}
+.close{float:right;border:0;background:none;font-size:24px;cursor:pointer;color:#64748b}
+@media(max-width:900px){
+.sidebar{width:76px;padding:20px 9px}
+.brand div:not(.logo),.nav span,.brand small{display:none}
+.main{margin-left:76px;width:calc(100% - 76px);padding:0 18px 30px}
+.topbar{margin:0 -18px 25px;padding:0 18px}
+.grid{grid-template-columns:1fr}
+.content-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+.main{padding:0 12px 25px}
+.topbar{margin:0 -12px 20px;padding:0 12px}
+.topbar-left{display:none}
+h1{font-size:24px}
+.ai{right:15px;bottom:15px}
+}
+
+/* Payment portal navigation button */
+.nav button {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+
+.payment-portal-card { overflow: hidden; }
+.portal-header { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:22px; }
+.portal-header h2 { margin:4px 0 5px; }
+.eyebrow { font-size:11px; font-weight:800; letter-spacing:.08em; color:#2563eb; }
+.muted { color:#64748b; margin:0; }
+.portal-actions { display:flex; gap:10px; flex-wrap:wrap; }
+.btn.ghost { background:#fff; border:1px solid #dbe3ef; color:#334155; cursor:pointer; }
+.payment-summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-bottom:20px; }
+.summary-box { border:1px solid #e5eaf2; border-radius:14px; padding:18px; background:#f8fafc; }
+.summary-box span,.summary-box small,.info-grid span { display:block; color:#64748b; font-size:12px; }
+.summary-box strong { display:block; margin:7px 0 4px; font-size:24px; color:#0f172a; }
+.portal-panel { border:1px solid #e5eaf2; border-radius:14px; padding:18px; margin-top:16px; background:#fff; }
+.panel-title-row { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+.panel-title-row h3,.payment-help h3 { margin:0 0 4px; }
+.status-chip { border-radius:999px; padding:6px 10px; background:#eff6ff; color:#1d4ed8; font-size:12px; font-weight:700; }
+.table-wrap { overflow-x:auto; }
+.payment-table { width:100%; border-collapse:collapse; min-width:720px; }
+.payment-table th,.payment-table td { text-align:left; padding:13px 10px; border-bottom:1px solid #edf0f5; font-size:13px; }
+.payment-table th { color:#64748b; font-size:11px; text-transform:uppercase; letter-spacing:.04em; }
+.status { display:inline-block; border-radius:999px; padding:5px 9px; font-size:11px; font-weight:700; }
+.status.approved { background:#dcfce7; color:#166534; }
+.status.pending { background:#fef3c7; color:#92400e; }
+.table-btn { border:1px solid #dbe3ef; background:#fff; color:#1d4ed8; border-radius:7px; padding:5px 9px; cursor:pointer; }
+.info-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-top:12px; }
+.info-grid strong { display:block; margin-top:4px; font-size:14px; }
+.text-success { color:#15803d; }
+.nav button { width:100%; border:0; background:transparent; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+@media (max-width:800px) { .portal-header{flex-direction:column}.payment-summary-grid{grid-template-columns:1fr}.info-grid{grid-template-columns:1fr 1fr} }
+
+</style>
+<style>
+/* Functional profile/history/settings UI */
+.function-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.52);z-index:120;align-items:center;justify-content:center;padding:20px}
+.function-overlay.show{display:flex}
+.function-window{width:560px;max-width:100%;max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:25px;box-shadow:0 25px 70px rgba(15,23,42,.25);position:relative}
+.function-window h2{margin:5px 0 6px;font-size:24px}
+.function-window .subtitle{margin-bottom:18px}
+.function-close{position:absolute;right:16px;top:10px;border:0;background:none;font-size:26px;color:#64748b;cursor:pointer}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid .full{grid-column:1/-1}
+.form-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:18px}
+.btn.secondary{background:#e2e8f0;color:#334155}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #eef2f7;gap:20px}
+.settings-row:last-child{border-bottom:0}
+.settings-row strong{display:block;font-size:14px}.settings-row small{display:block;color:#64748b;margin-top:3px}
+.switch{position:relative;width:48px;height:26px;flex:0 0 auto}.switch input{display:none}.slider{position:absolute;inset:0;background:#cbd5e1;border-radius:99px;cursor:pointer;transition:.2s}.slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}.switch input:checked+.slider{background:#2563eb}.switch input:checked+.slider:before{transform:translateX(22px)}
+.history-list{margin-top:10px}.history-item{display:flex;justify-content:space-between;gap:15px;padding:13px 0;border-bottom:1px solid #eef2f7}.history-item:last-child{border-bottom:0}.history-item strong{font-size:13px}.history-item small{display:block;color:#64748b;margin-top:3px}
+.toast{position:fixed;right:25px;bottom:85px;background:#111827;color:#fff;padding:12px 15px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:200;display:none;font-size:13px;font-weight:700}.toast.show{display:block}
+body.dark-mode{background:#0f172a;color:#e5e7eb}body.dark-mode .card,body.dark-mode .topbar,body.dark-mode .function-window,body.dark-mode .payment-window,body.dark-mode .login-card,body.dark-mode .chat-window{background:#1e293b;color:#e5e7eb}body.dark-mode .topbar{border-color:#334155}body.dark-mode .muted,body.dark-mode .subtitle,body.dark-mode .stat-label,body.dark-mode .topbar-left,body.dark-mode .summary-box span,body.dark-mode .summary-box small,body.dark-mode .info-grid span,body.dark-mode .settings-row small{color:#94a3b8}body.dark-mode .summary-box,body.dark-mode .portal-panel{background:#172033;border-color:#334155}body.dark-mode .input{background:#0f172a;color:#fff;border-color:#475569}body.dark-mode .btn.ghost,body.dark-mode .table-btn{background:#1e293b;color:#bfdbfe;border-color:#475569}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.function-window{padding:20px}}
+</style>
+
+<style>
+/* =========================
+   ROLE-BASED ADMIN PANEL
+   ========================= */
+.admin-only{display:none!important}
+body.admin-mode .admin-only{display:flex!important}
+body.admin-mode .user-only{display:none!important}
+.role-badge{display:inline-flex;align-items:center;gap:6px;margin-left:8px;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;background:#dbeafe;color:#1d4ed8}
+.admin-nav-item{display:none}
+body.admin-mode .admin-nav-item{display:flex}
+.admin-dashboard{display:none}
+body.admin-mode .admin-dashboard{display:block}
+.admin-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.admin-table{width:100%;border-collapse:collapse;min-width:850px}
+.admin-table th,.admin-table td{padding:12px 10px;border-bottom:1px solid #eef2f7;text-align:left;font-size:13px}
+.admin-table th{font-size:11px;text-transform:uppercase;color:#64748b}
+.admin-actions{display:flex;gap:7px;flex-wrap:wrap}
+.btn.danger{background:#fee2e2;color:#b91c1c}
+.btn.success{background:#dcfce7;color:#166534}
+@media(max-width:1000px){.admin-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.admin-grid{grid-template-columns:1fr}}
+</style>
+
+
+<style id="capstone-enhancement-styles">
+/* ===== CAPSTONE ENHANCEMENT ===== */
+.capstone-only{display:none}
+body.user-mode .capstone-user{display:block}
+body.admin-mode .capstone-admin{display:block}
+body.admin-mode .user-dashboard-content{display:none}
+
+.capstone-hero{
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 55%,#2563eb 100%);
+  color:#fff;border-radius:18px;padding:24px;margin-bottom:20px;
+  box-shadow:0 14px 35px rgba(37,99,235,.18);
+}
+.capstone-hero .eyebrow{color:#bfdbfe}
+.capstone-hero h2{font-size:24px;margin-top:5px}
+.capstone-hero p{color:#dbeafe;margin-top:7px;font-size:13px}
+.capstone-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.capstone-btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;cursor:pointer}
+.capstone-btn.light{background:#fff;color:#1d4ed8}
+.capstone-btn.soft{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.22)}
+.capstone-section-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-bottom:20px}
+.capstone-mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.capstone-mini{padding:16px;border:1px solid #e5e7eb;border-radius:13px;background:#fff}
+.capstone-mini span{display:block;color:#64748b;font-size:12px}
+.capstone-mini strong{display:block;font-size:19px;margin-top:6px}
+.capstone-progress{height:9px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin-top:10px}
+.capstone-progress span{display:block;height:100%;background:#2563eb;border-radius:99px}
+.capstone-list{list-style:none;display:grid;gap:10px}
+.capstone-list li{padding:12px;border:1px solid #e5e7eb;border-radius:11px;background:#fff}
+.capstone-list strong{display:block;font-size:13px}
+.capstone-list small{display:block;color:#64748b;margin-top:3px}
+.capstone-toolbar{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+.capstone-toolbar .toolbar-left,.capstone-toolbar .toolbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.capstone-search{min-width:240px;border:1px solid #d7dee9;border-radius:9px;padding:10px 12px;outline:0}
+.capstone-search:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.capstone-filter{border:1px solid #d7dee9;border-radius:9px;padding:10px 12px;background:#fff}
+.capstone-badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:99px;font-size:10px;font-weight:800}
+.capstone-badge.blue{background:#dbeafe;color:#1d4ed8}
+.capstone-badge.green{background:#dcfce7;color:#166534}
+.capstone-badge.amber{background:#fef3c7;color:#92400e}
+.capstone-badge.red{background:#fee2e2;color:#b91c1c}
+.capstone-alert{display:flex;gap:12px;align-items:flex-start;padding:13px;border-radius:12px;background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:10px}
+.capstone-alert:last-child{margin-bottom:0}
+.capstone-alert-icon{font-size:19px}
+.capstone-alert strong{display:block;font-size:13px}
+.capstone-alert small{display:block;color:#64748b;margin-top:3px}
+.admin-feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.admin-feature-card{padding:18px}
+.admin-feature-card h3{font-size:15px;margin-bottom:5px}
+.admin-feature-card p{font-size:12px;color:#64748b;line-height:1.5}
+.admin-feature-card .feature-icon{font-size:24px;margin-bottom:9px}
+.admin-stat-change{font-size:11px;color:#166534;font-weight:800;margin-top:5px}
+.admin-kpi-chart{height:10px;background:#eef2f7;border-radius:99px;overflow:hidden;margin-top:10px}
+.admin-kpi-chart span{display:block;height:100%;background:#2563eb}
+.admin-two-col{display:grid;grid-template-columns:1.35fr .9fr;gap:20px;margin-bottom:20px}
+.capstone-modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:250;align-items:center;justify-content:center;padding:20px}
+.capstone-modal.show{display:flex}
+.capstone-modal-card{width:620px;max-width:100%;max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:24px;box-shadow:0 25px 70px rgba(15,23,42,.25)}
+.capstone-modal-card h2{font-size:22px;margin-top:4px}
+.capstone-close{float:right;border:0;background:none;font-size:26px;color:#64748b;cursor:pointer}
+.audit-item{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid #eef2f7}
+.audit-item:last-child{border-bottom:0}
+.audit-dot{width:9px;height:9px;border-radius:50%;background:#2563eb;margin-top:5px;flex:0 0 auto}
+.audit-item strong{font-size:12px}
+.audit-item small{display:block;color:#64748b;margin-top:2px}
+body.dark-mode .capstone-mini,body.dark-mode .capstone-list li,body.dark-mode .capstone-modal-card,body.dark-mode .capstone-filter{background:#1e293b;border-color:#334155}
+body.dark-mode .capstone-search{background:#0f172a;color:#fff;border-color:#475569}
+@media(max-width:1000px){
+ .capstone-section-grid,.admin-two-col{grid-template-columns:1fr}
+ .admin-feature-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:650px){
+ .admin-feature-grid{grid-template-columns:1fr}
+ .capstone-mini-grid{grid-template-columns:1fr}
+ .capstone-search{min-width:180px;width:100%}
+}
+</style>
+
+<style id="admin-only-view-fix">
+/* =========================
+   ADMIN-ONLY VIEW FIX
+   =========================
+   When an administrator logs in, show only the administrative control
+   center. Student-facing balances, payment portal, history, notices,
+   profile and settings are hidden from the admin screen.
+*/
+body.admin-mode #dashboardSection,
+body.admin-mode > .app .main > .grid,
+body.admin-mode #payment-overview,
+body.admin-mode #capstoneUserWidgets {
+    display: none !important;
+}
+
+/* Hide student navigation while admin is logged in. */
+body.admin-mode #profileNav,
+body.admin-mode #paymentsNav,
+body.admin-mode #historyNav,
+body.admin-mode #alertsNav,
+body.admin-mode #aiNav,
+body.admin-mode #settingsNav {
+    display: none !important;
+}
+
+/* Keep the admin control center visually primary. */
+body.admin-mode .main {
+    width: calc(100% - 250px);
+}
+
+body.admin-mode .capstone-admin {
+    margin-top: 0;
+}
+
+body.admin-mode .admin-dashboard .header h1::before {
+    content: "🛡️ ";
+}
+
+body.admin-mode .role-badge {
+    background: #dcfce7;
+    color: #166534;
+}
+
+/* The admin should not see student payment amounts/balance cards. */
+body.admin-mode .payment-summary-grid,
+body.admin-mode .payment-portal-card,
+body.admin-mode .user-dashboard-content {
+    display: none !important;
+}
+</style>
+<style id="top-summary-removal">
+/* Student top summary cards intentionally removed. */
+body.user-mode > .app .main > .grid { display:none !important; }
+</style>
+<style id="safe-ui-enhancement">
+/* ===== SAFE UI ENHANCEMENT v1 ===== */
+:root{
+  --ui-primary:#2563eb;
+  --ui-primary-dark:#1d4ed8;
+  --ui-border:#e5eaf2;
+  --ui-soft:#f8fafc;
+  --ui-text:#0f172a;
+  --ui-muted:#64748b;
+}
+.sidebar{
+  box-shadow: 4px 0 22px rgba(15,23,42,.06);
+  border-right:1px solid rgba(226,232,240,.9);
+}
+.brand .logo{
+  box-shadow:0 8px 20px rgba(37,99,235,.20);
+}
+.nav a{
+  border-radius:12px;
+  margin:3px 0;
+  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
+}
+.nav a:hover{
+  transform:translateX(2px);
+  background:#eff6ff;
+}
+.nav a.active{
+  box-shadow:0 5px 16px rgba(37,99,235,.10);
+}
+.topbar{
+  box-shadow:0 1px 0 rgba(226,232,240,.9),0 8px 24px rgba(15,23,42,.03);
+  backdrop-filter:blur(8px);
+}
+.card,.panel,.payment-portal-card{
+  border:1px solid var(--ui-border);
+  box-shadow:0 8px 28px rgba(15,23,42,.045);
+}
+.payment-portal-card{
+  border-radius:20px;
+}
+.portal-header{
+  padding-bottom:4px;
+}
+.summary-box{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(145deg,#fff,#f8fafc);
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.summary-box:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 22px rgba(15,23,42,.07);
+}
+.summary-box strong{
+  font-size:22px;
+  color:var(--ui-text);
+}
+.summary-box:first-child{
+  border-left:4px solid var(--ui-primary);
+}
+.table-wrap{
+  border:1px solid var(--ui-border);
+  border-radius:14px;
+  overflow:auto;
+}
+.payment-table thead th{
+  background:#f8fafc;
+  color:#475569;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+.payment-table tbody tr{
+  transition:background .16s ease;
+}
+.payment-table tbody tr:hover{
+  background:#f8fbff;
+}
+.capstone-hero{
+  border-radius:22px !important;
+  box-shadow:0 12px 32px rgba(15,23,42,.08);
+}
+.capstone-section-grid .panel{
+  border-radius:18px;
+}
+.capstone-mini{
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+.capstone-mini:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(15,23,42,.06);
+}
+.ai{
+  box-shadow:0 12px 30px rgba(15,23,42,.18);
+}
+.ai button{
+  transition:transform .15s ease;
+}
+.ai button:hover{
+  transform:translateY(-1px);
+}
+.status-chip,.capstone-badge{
+  font-weight:800;
+}
+@media(max-width:600px){
+  .payment-summary-grid{
+    grid-template-columns:1fr !important;
+  }
+  .portal-header{
+    flex-direction:column;
+  }
+  .portal-actions{
+    width:100%;
+  }
+  .portal-actions .btn{
+    flex:1;
+  }
+  .capstone-actions{
+    flex-direction:column;
+  }
+  .capstone-actions button{
+    width:100%;
+  }
+}
+/* ===== END SAFE UI ENHANCEMENT ===== */
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">B</div>
+      <div>
+        <strong>BESTLINK COLLEGE</strong>
+        <small>AI Student Management</small>
+      </div>
+    </div>
+    <nav class="nav">
+      <a class="active" href="#"><span>🏠</span><span>Dashboard</span></a>
+      <a href="#" id="profileNav"><span>👤</span><span>Profile</span></a>
+      <a href="#" id="paymentsNav"><span>💰</span><span>Payments</span></a>
+      <a href="#" id="historyNav"><span>📜</span><span>History</span></a>
+      <a href="#" id="alertsNav"><span>🔔</span><span>Alerts</span></a>
+      <a href="#" id="aiNav"><span>🤖</span><span>AI Chat</span></a>
+      <a href="#" id="settingsNav"><span>⚙</span><span>Settings</span></a>
+
+      <a href="#" id="adminNav" class="admin-nav-item"><span>🛡️</span><span>Admin Dashboard</span></a>
+
+      <div class="spacer"></div>
+     <a href="#" id="loginNav"><span>🚪</span><span>Login</span></a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+     <h3><div class="topbar-left"><strong>AI-POWERED STUDENT MANAGEMENT SYSTEM</strong></div></h3>
+      <div class="user-area">
+        <span class="icon-btn">🔔</span>
+        <div class="user"><div class="avatar">U</div><span>User</span><span class="role-badge" id="roleBadge">USER</span></div>
+      </div>
+    </header>
+
+    <section class="header" id="dashboardSection">
+      <div>
+        <div class="eyebrow">STUDENT PORTAL</div>
+        <h1>Welcome Back!</h1>
+        <p class="subtitle">Manage your student information, payments, and inquiries in one place.</p>
+      </div>
+    </section>
+
+    <section class="card payment-portal-card" id="payment-overview">
+  <div class="portal-header">
+    <div>
+      <div class="eyebrow">STUDENT PAYMENT PORTAL</div>
+      <h2>Payment Portal</h2>
+      <p class="muted">View your balance, payment status, recent transactions, and receipts.</p>
+    </div>
+    <div class="portal-actions">
+      <button type="button" class="btn primary" id="portalPayNow">💳 Pay Now</button>
+      <button type="button" class="btn ghost" id="refreshPayments">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="payment-summary-grid">
+    <div class="summary-box">
+      <span>Outstanding Balance</span>
+      <strong id="portalBalance">₱19,500.00</strong>
+      <small>Current amount due</small>
+    </div>
+    <div class="summary-box">
+      <span>Payment Status</span>
+      <strong id="portalStatus">Pending</strong>
+      <small id="portalStatusDetail">Awaiting payment</small>
+    </div>
+    <div class="summary-box">
+      <span>Next Due Date</span>
+      <strong>Aug 30, 2026</strong>
+      <small>Payment deadline</small>
+    </div>
+  </div>
+
+  <div class="portal-panel">
+    <div class="panel-title-row">
+      <div>
+        <h3>Recent Transactions</h3>
+        <p class="muted">Your payment records are displayed below.</p>
+      </div>
+      <span class="status-chip" id="transactionCount">3 transactions</span>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><input class="capstone-search" id="userPaymentSearch" type="search" placeholder="Search payment reference or method..." aria-label="Search payment history"></div>
+
+    <div class="table-wrap">
+      <table class="payment-table">
+        <thead>
+          <tr>
+            <th>Date</th><th>Reference</th><th>Method</th><th>Amount</th><th>Status</th><th>Receipt</th>
+          </tr>
+        </thead>
+        <tbody id="paymentHistoryBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="portal-panel payment-help">
+    <h3>Payment Information</h3>
+    <div class="info-grid">
+      <div><span>Student</span><strong id="portalStudent">Student Account</strong></div>
+      <div><span>Student ID</span><strong>BLCP-2026-0001</strong></div>
+      <div><span>Program</span><strong>BS Information Technology</strong></div>
+      <div><span>Account Status</span><strong class="text-success">Active</strong></div>
+    </div>
+  </div>
+</section>
+
+    
+<!-- CAPSTONE USER EXPERIENCE -->
+<section class="capstone-user user-dashboard-content" id="capstoneUserWidgets">
+  <div class="capstone-hero">
+    <div class="eyebrow">SMART STUDENT SERVICES</div>
+    <h2>Your Student Account at a Glance</h2>
+    <p>Monitor your payment progress, upcoming deadlines, account status, and important school announcements.</p>
+    <div class="capstone-actions">
+      <button class="capstone-btn light" type="button" id="capstoneQuickPay">💳 Make Payment</button>
+      <button class="capstone-btn soft" type="button" id="capstoneViewHistory">📜 View History</button>
+      <button class="capstone-btn soft" type="button" id="capstoneAskAI">🤖 Ask AI Assistant</button>
+    </div>
+  </div>
+
+  <div class="capstone-section-grid">
+    <section class="card panel">
+      <div class="panel-title-row">
+        <div><h3>Payment Progress</h3><p class="muted">Estimated progress based on your current account figures.</p></div>
+        <span class="capstone-badge blue" id="capstonePaymentPercent">56% PAID</span>
+      </div>
+      <div class="capstone-mini-grid">
+        <div class="capstone-mini"><span>Total Assessment</span><strong>₱44,500.00</strong></div>
+        <div class="capstone-mini"><span>Total Paid</span><strong>₱25,000.00</strong></div>
+        <div class="capstone-mini"><span>Outstanding</span><strong>₱19,500.00</strong></div>
+        <div class="capstone-mini"><span>Next Due</span><strong>Aug 30, 2026</strong></div>
+      </div>
+      <div class="capstone-progress"><span id="capstoneProgressBar" style="width:56%"></span></div>
+    </section>
+
+    <section class="card panel">
+      <div class="panel-title-row"><div><h3>Important Notices</h3><p class="muted">Latest account reminders.</p></div></div>
+      <div id="studentNoticeList">
+        <div class="capstone-alert"><div class="capstone-alert-icon">📅</div><div><strong>Payment deadline reminder</strong><small>Your next payment is due on August 30, 2026.</small></div></div>
+        <div class="capstone-alert"><div class="capstone-alert-icon">🔐</div><div><strong>Account security</strong><small>Keep your password private and log out on shared computers.</small></div></div>
+      </div>
+    </section>
+  </div>
+</section>
+
+
+<!-- CAPSTONE ADMIN DASHBOARD -->
+<section class="admin-dashboard capstone-admin" id="adminDashboard">
+  <div class="header">
+    <div>
+      <div class="eyebrow">ADMINISTRATION • CONTROL CENTER</div>
+      <h1>Admin Dashboard</h1>
+      <p class="subtitle">Manage student accounts, payment verification, collections, announcements, and system activity.</p>
+    </div>
+    <div class="capstone-actions" style="margin-top:0">
+      <button class="btn ghost" type="button" id="adminRefreshAll">↻ Refresh Data</button>
+      <button class="btn primary" type="button" id="adminExportPayments">⇩ Export Payments</button>
+    </div>
+  </div>
+
+  <section class="admin-grid">
+    <div class="card stat"><div><div class="stat-label">Registered Users</div><div class="stat-value" id="adminUserCount">0</div><div class="admin-stat-change">Active student accounts</div></div><div class="stat-icon">👥</div></div>
+    <div class="card stat"><div><div class="stat-label">Pending Payments</div><div class="stat-value" id="adminPendingCount">0</div><div class="admin-stat-change">Needs verification</div></div><div class="stat-icon">⏳</div></div>
+    <div class="card stat"><div><div class="stat-label">Verified Payments</div><div class="stat-value" id="adminVerifiedCount">0</div><div class="admin-stat-change">Successfully processed</div></div><div class="stat-icon">✓</div></div>
+    <div class="card stat"><div><div class="stat-label">Collected Amount</div><div class="stat-value" id="adminCollected">₱0.00</div><div class="admin-stat-change">Verified transactions</div></div><div class="stat-icon">₱</div></div>
+  </section>
+
+  <section class="admin-feature-grid">
+    <div class="card admin-feature-card"><div class="feature-icon">🎓</div><h3>Student Management</h3><p>Search accounts, inspect student details, and monitor account status.</p><button class="btn ghost" type="button" id="adminFocusStudents" style="margin-top:12px">Manage Students</button></div>
+    <div class="card admin-feature-card"><div class="feature-icon">💳</div><h3>Payment Verification</h3><p>Review submitted references and quickly approve or reject payments.</p><button class="btn ghost" type="button" id="adminFocusPayments" style="margin-top:12px">Review Payments</button></div>
+    <div class="card admin-feature-card"><div class="feature-icon">📢</div><h3>Announcements</h3><p>Create school/payment notices visible to student accounts.</p><button class="btn ghost" type="button" id="adminOpenAnnouncements" style="margin-top:12px">Manage Notices</button></div>
+  </section>
+
+  <section class="admin-two-col">
+    <section class="card panel" id="adminStudentsSection">
+      <div class="panel-title-row">
+        <div><h3>Student Accounts</h3><p class="muted">Search and monitor registered accounts.</p></div>
+        <span class="status-chip" id="adminStudentResultCount">0 students</span>
+      </div>
+      <div class="capstone-toolbar">
+        <div class="toolbar-left">
+          <input class="capstone-search" id="adminStudentSearch" type="search" placeholder="Search name, username, or student ID...">
+          <select class="capstone-filter" id="adminStudentStatus"><option value="">All Status</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
+        </div>
+        <div class="toolbar-right"><button class="btn primary" id="addStudentButton" type="button">＋ Add Student</button><button class="btn ghost" id="refreshAdminUsers" type="button">↻ Refresh</button></div>
+      </div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>ID</th><th>Username</th><th>Full Name</th><th>Student ID</th><th>Role</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="adminUsersBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card panel">
+      <div class="panel-title-row"><div><h3>System Activity</h3><p class="muted">Recent administrative events.</p></div></div>
+      <div id="adminAuditLog">
+        <div class="audit-item"><span class="audit-dot"></span><div><strong>System initialized</strong><small>Admin control center is ready.</small></div></div>
+      </div>
+    </section>
+  </section>
+
+  <section class="card panel" id="adminPaymentsSection" style="margin-bottom:20px">
+    <div class="panel-title-row">
+      <div><h3>Payment Verification Center</h3><p class="muted">Filter submissions and process payment verification.</p></div>
+      <span class="status-chip" id="adminPaymentResultCount">0 payments</span>
+    </div>
+    <div class="capstone-toolbar">
+      <div class="toolbar-left">
+        <input class="capstone-search" id="adminPaymentSearch" type="search" placeholder="Search student or reference...">
+        <select class="capstone-filter" id="adminPaymentStatus"><option value="">All Status</option><option value="Pending Verification">Pending</option><option value="Verified">Verified</option><option value="Rejected">Rejected</option></select>
+      </div>
+      <div class="toolbar-right"><button class="btn ghost" id="refreshAdminPayments" type="button">↻ Refresh</button></div>
+    </div>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Date</th><th>Student</th><th>Reference</th><th>Method</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="adminPaymentsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="admin-two-col">
+    <section class="card panel">
+      <div class="panel-title-row"><div><h3>Payment Collection Overview</h3><p class="muted">Visual summary of payment processing.</p></div></div>
+      <div class="info-row"><span>Pending Verification</span><strong id="adminPendingBarText">0</strong></div>
+      <div class="admin-kpi-chart"><span id="adminPendingBar" style="width:0%"></span></div>
+      <div class="info-row"><span>Verified</span><strong id="adminVerifiedBarText">0</strong></div>
+      <div class="admin-kpi-chart"><span id="adminVerifiedBar" style="width:0%"></span></div>
+      <div class="info-row"><span>Rejected</span><strong id="adminRejectedBarText">0</strong></div>
+      <div class="admin-kpi-chart"><span id="adminRejectedBar" style="width:0%"></span></div>
+    </section>
+
+    <section class="card panel">
+      <div class="panel-title-row"><div><h3>Capstone Readiness</h3><p class="muted">Recommended operational controls.</p></div><span class="capstone-badge green">READY</span></div>
+      <ul class="capstone-list">
+        <li><strong>Role-based access</strong><small>Admin and student views are separated.</small></li>
+        <li><strong>Payment verification workflow</strong><small>Pending → Verified/Rejected.</small></li>
+        <li><strong>Audit-ready activity area</strong><small>Useful for demonstration and documentation.</small></li>
+        <li><strong>Responsive interface</strong><small>Works on desktop and smaller screens.</small></li>
+      </ul>
+    </section>
+  </section>
+</section>
+
+  </main>
+
+  <button class="ai" id="aiButton">🤖 AI Chat</button>
+</div>
+
+
+
+<div class="capstone-modal" id="studentModal">
+  <div class="capstone-modal-card">
+    <button class="capstone-close" id="closeStudentModal" type="button">×</button>
+    <div class="eyebrow">ADMIN • STUDENT MANAGEMENT</div>
+    <h2 id="studentModalTitle">Add Student</h2>
+    <p class="subtitle">Create or update a student account in the MySQL database.</p>
+
+    <form id="studentForm">
+      <input type="hidden" id="studentFormId">
+
+      <div class="form-grid">
+        <div>
+          <label class="form-label">Username</label>
+          <input class="input" id="studentUsername" required maxlength="50" placeholder="e.g. juandelacruz">
+        </div>
+        <div>
+          <label class="form-label">Student ID</label>
+          <input class="input" id="studentId" maxlength="50" placeholder="e.g. BLCP-2026-0002">
+        </div>
+      </div>
+
+      <label class="form-label">Full Name</label>
+      <input class="input" id="studentFullName" required maxlength="150" placeholder="e.g. Juan Dela Cruz">
+
+      <div class="form-grid">
+        <div>
+          <label class="form-label">Password</label>
+          <input class="input" id="studentPassword" type="password" minlength="6" placeholder="Required for new account">
+        </div>
+        <div>
+          <label class="form-label">Status</label>
+          <select class="input" id="studentAccountStatus">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="edit-actions">
+        <button class="btn ghost" type="button" id="cancelStudentModal">Cancel</button>
+        <button class="btn primary" type="submit">Save Student</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="capstone-modal" id="resetPasswordModal">
+  <div class="capstone-modal-card">
+    <button class="capstone-close" id="closeResetPasswordModal" type="button">×</button>
+    <div class="eyebrow">ADMIN • ACCOUNT SECURITY</div>
+    <h2>Reset Student Password</h2>
+    <p class="subtitle">Set a new password for <strong id="resetPasswordStudentName"></strong>.</p>
+    <form id="resetPasswordForm">
+      <input type="hidden" id="resetPasswordUserId">
+      <label class="form-label">New Password</label>
+      <input class="input" id="resetPasswordValue" type="password" minlength="6" required placeholder="At least 6 characters">
+      <div class="edit-actions">
+        <button class="btn ghost" type="button" id="cancelResetPassword">Cancel</button>
+        <button class="btn primary" type="submit">Reset Password</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="capstone-modal" id="announcementModal">
+  <div class="capstone-modal-card">
+    <button class="capstone-close" id="closeAnnouncement">×</button>
+    <div class="eyebrow">ADMIN TO STUDENTS</div>
+    <h2>Publish Announcement</h2>
+    <p class="subtitle">Create a notice that can be displayed in the student portal.</p>
+    <form id="announcementForm">
+      <label class="form-label">Title</label>
+      <input class="input" id="announcementTitle" maxlength="80" required placeholder="e.g. Payment deadline reminder">
+      <label class="form-label">Message</label>
+      <textarea class="input" id="announcementMessage" rows="5" maxlength="300" required placeholder="Enter announcement details..."></textarea>
+      <div class="edit-actions">
+        <button class="btn ghost" type="button" id="cancelAnnouncement">Cancel</button>
+        <button class="btn primary" type="submit">Publish Notice</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <button class="close" id="closeLogin">×</button>
+    <h2>Account Login</h2>
+    <p class="subtitle">Sign in to your AI-powered student management portal.</p>
+    <div id="errorMessage" class="error-message">Please enter your username and password.</div>
+    <form id="loginForm">
+      <label class="form-label" for="username">Username</label>
+      <input class="input" type="text" id="username" placeholder="Enter your username" autocomplete="username">
+      <label class="form-label" for="password">Password</label>
+      <input class="input" type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+      <small style="display:block;margin-top:9px;color:#64748b;font-size:12px">Demo accounts: <strong>student / 123456</strong> &nbsp;|&nbsp; <strong>admin / admin123</strong></small><button type="submit" class="login-btn" id="loginButton">Sign In</button>
+    </form>
+  </div>
+</div>
+
+
+
+<div class="chat-overlay" id="chatOverlay">
+  <div class="chat-window">
+    <div class="chat-header">
+      <div><strong>🤖 AI Payment Assistant</strong><small>Student Payment Inquiry</small></div>
+      <button id="closeChat" class="chat-close">×</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot">Hello! I'm your AI Payment Assistant. What would you like to know?</div>
+    </div>
+    <div class="quick-questions">
+      <button data-question="What is my balance?">💰 My Balance</button>
+      <button data-question="When is my payment due?">📅 Payment Deadline</button>
+      <button data-question="What payment methods are available?">💳 Payment Methods</button><button data-question="Can I pay using Hello Money App (HMA)?">📱 Hello Money App (HMA)</button>
+      <button data-question="Show my payment history.">📜 Payment History</button>
+    </div>
+    <form class="chat-input" id="chatForm">
+      <input id="chatInput" type="text" placeholder="Type your question..." autocomplete="off">
+      <button type="submit">➤</button>
+    </form>
+  </div>
+</div>
+<style>
+.chat-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.38);z-index:100;align-items:flex-end;justify-content:flex-end;padding:25px}
+.chat-overlay.show{display:flex}
+.chat-window{width:390px;max-width:100%;height:590px;background:#fff;border-radius:18px;box-shadow:0 25px 70px rgba(15,23,42,.25);overflow:hidden;display:flex;flex-direction:column}
+.chat-header{background:#111827;color:#fff;padding:17px 18px;display:flex;align-items:center;justify-content:space-between}
+.chat-header strong{display:block;font-size:15px}.chat-header small{display:block;color:#cbd5e1;font-size:11px;margin-top:3px}
+.chat-close{border:0;background:transparent;color:#fff;font-size:26px;cursor:pointer}
+.chat-messages{flex:1;padding:17px;overflow:auto;background:#f8fafc}
+.message{max-width:82%;padding:10px 12px;border-radius:13px;margin-bottom:10px;font-size:13px;line-height:1.45}
+.message.bot{background:#e5e7eb;color:#172033}.message.user{background:#2563eb;color:#fff;margin-left:auto}
+.quick-questions{display:flex;gap:6px;padding:9px;overflow-x:auto;border-top:1px solid #e5e7eb}
+.quick-questions button{white-space:nowrap;border:1px solid #dbe3ee;background:#fff;border-radius:99px;padding:7px 9px;font-size:11px;cursor:pointer}
+.quick-questions button:hover{background:#eff6ff}
+.chat-input{display:flex;padding:12px;border-top:1px solid #e5e7eb;gap:8px}
+.chat-input input{flex:1;border:1px solid #d7dee9;border-radius:9px;padding:11px;outline:0}
+.chat-input input:focus{border-color:#2563eb}
+.chat-input button{border:0;background:#2563eb;color:#fff;border-radius:9px;width:44px;font-size:17px;cursor:pointer}
+@media(max-width:600px){.chat-overlay{padding:10px}.chat-window{height:calc(100vh - 20px);width:100%}}
+</style>
+
+
+<style>
+.payment-record-actions{display:flex;gap:6px;flex-wrap:wrap}
+.record-action-row td{padding-top:0;border-bottom:1px solid #eef2f7}
+.table-btn.edit-btn{color:#2563eb;border-color:#bfdbfe;background:#eff6ff}
+.table-btn.delete-btn{color:#b91c1c;border-color:#fecaca;background:#fff1f2}
+.edit-payment-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:120;align-items:center;justify-content:center;padding:20px}
+.edit-payment-overlay.show{display:flex}
+.edit-payment-window{position:relative;width:480px;max-width:100%;background:#fff;border-radius:18px;padding:28px;box-shadow:0 25px 70px rgba(15,23,42,.25)}
+.edit-payment-window h2{margin-top:5px;font-size:24px}
+.edit-payment-window .subtitle{margin:7px 0 18px}
+.edit-payment-close{position:absolute;right:17px;top:12px;border:0;background:none;font-size:26px;color:#64748b;cursor:pointer}
+.edit-actions{display:flex;gap:10px;margin-top:20px}
+.edit-actions button{flex:1}
+@media(max-width:600px){.edit-actions{flex-direction:column}}
+</style>
+
+<div class="payment-overlay" id="paymentOverlay">
+  <div class="payment-window">
+    <button class="payment-close" id="closePayment">×</button>
+    <div class="eyebrow">SMART PAYMENT COLLECTION</div>
+    <h2>Make a Payment</h2>
+    <p class="subtitle">Outstanding balance: <strong id="paymentModalBalance">₱19,500.00</strong></p>
+    <form id="paymentForm">
+      <label class="form-label">Payment Amount</label>
+      <input class="input" id="paymentAmount" type="number" min="1" placeholder="Enter amount" required>
+      <label class="form-label">Payment Method</label>
+      <select class="input" id="paymentMethod" required>
+        <option value="">Select payment method</option>
+        <option>GCash</option>
+        <option>Bank Transfer</option>
+        <option>Cash</option>
+        <option>Hello Money App (HMA) </option>
+      </select>
+      <label class="form-label">Reference Number</label>
+      <input class="input" id="paymentReference" type="text" placeholder="Enter reference number" required>
+      <label class="form-label">Proof of Payment</label>
+      <input class="input" id="paymentProof" type="file" accept="image/*,.pdf">
+      <button class="login-btn" type="submit">Submit Payment</button>
+    </form>
+    <div id="paymentSuccess" style="display:none;margin-top:15px;padding:12px;border-radius:9px;background:#dcfce7;color:#166534;font-size:13px;font-weight:700"></div>
+  </div>
+</div>
+<style>
+.payment-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:90;align-items:center;justify-content:center;padding:20px}
+.payment-overlay.show{display:flex}
+.payment-window{position:relative;width:450px;max-width:100%;background:#fff;border-radius:18px;padding:28px;box-shadow:0 25px 70px rgba(15,23,42,.25)}
+.payment-window h2{margin-top:6px;font-size:25px}.payment-window .subtitle{margin:7px 0 18px}
+.payment-close{position:absolute;right:17px;top:12px;border:0;background:none;font-size:26px;color:#64748b;cursor:pointer}
+select.input{background:#fff}
+</style>
+
+
+<!-- Edit Payment Modal -->
+<div class="edit-payment-overlay" id="editPaymentOverlay">
+  <div class="edit-payment-window">
+    <button class="edit-payment-close" id="closeEditPayment" type="button">×</button>
+    <div class="eyebrow">PAYMENT RECORD MANAGEMENT</div>
+    <h2>Edit Payment</h2>
+    <p class="subtitle">Update the payment record below.</p>
+    <form id="editPaymentForm">
+      <input type="hidden" id="editPaymentId">
+      <label class="form-label" for="editPaymentAmount">Payment Amount</label>
+      <input class="input" id="editPaymentAmount" type="number" min="1" required>
+      <label class="form-label" for="editPaymentMethod">Payment Method</label>
+      <select class="input" id="editPaymentMethod" required>
+        <option value="">Select payment method</option>
+        <option>GCash</option>
+        <option>Bank Transfer</option>
+        <option>Cash</option>
+       <option>Hello Money App (HMA)</option> 
+      </select>
+      <label class="form-label" for="editPaymentReference">Reference Number</label>
+      <input class="input" id="editPaymentReference" type="text" required>
+      <div class="edit-actions">
+        <button type="button" class="btn ghost" id="cancelEditPayment">Cancel</button>
+        <button type="submit" class="btn primary">Save Changes</button>
+      </div>
+      <div id="editPaymentMessage" style="display:none;margin-top:12px;padding:10px;border-radius:9px;font-size:13px;font-weight:700"></div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Functional Profile Modal -->
+<div class="function-overlay" id="profileOverlay">
+  <div class="function-window">
+    <button class="function-close" id="closeProfile">×</button>
+    <div class="eyebrow">STUDENT PROFILE</div><h2>My Profile</h2>
+    <p class="subtitle">Update your student information. Changes are saved in this browser.</p>
+    <form id="profileForm">
+      <div class="form-grid">
+        <div><label class="form-label">Full Name</label><input class="input" id="profileName" required></div>
+        <div><label class="form-label">Student ID</label><input class="input" id="profileStudentId" required></div>
+        <div><label class="form-label">Program</label><input class="input" id="profileProgram" required></div>
+        <div><label class="form-label">Year Level</label><select class="input" id="profileYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select></div>
+        <div><label class="form-label">Email</label><input class="input" type="email" id="profileEmail"></div>
+        <div><label class="form-label">Phone</label><input class="input" id="profilePhone"></div>
+      </div>
+      <div class="form-actions"><button type="button" class="btn secondary" id="cancelProfile">Cancel</button><button class="btn primary" type="submit">Save Profile</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- Payment History Modal -->
+<div class="function-overlay" id="historyOverlay">
+  <div class="function-window">
+    <button class="function-close" id="closeHistory">×</button>
+    <div class="eyebrow">PAYMENT HISTORY</div><h2>Transaction History</h2>
+    <p class="subtitle">All verified and submitted payment records for this demo account.</p>
+    <div class="history-list" id="historyList"></div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="function-overlay" id="settingsOverlay">
+  <div class="function-window">
+    <button class="function-close" id="closeSettings">×</button>
+    <div class="eyebrow">ACCOUNT SETTINGS</div><h2>Settings</h2>
+    <p class="subtitle">Your preferences are saved locally in this browser.</p>
+    <div class="settings-row"><div><strong>Dark Mode</strong><small>Use a darker interface.</small></div><label class="switch"><input type="checkbox" id="darkModeSetting"><span class="slider"></span></label></div>
+    <div class="settings-row"><div><strong>Payment Notifications</strong><small>Show reminders for payment deadlines.</small></div><label class="switch"><input type="checkbox" id="notificationSetting" checked><span class="slider"></span></label></div>
+    <div class="settings-row"><div><strong>Auto-save Profile</strong><small>Keep profile changes in local storage.</small></div><label class="switch"><input type="checkbox" id="autosaveSetting" checked><span class="slider"></span></label></div>
+    <div class="form-actions"><button class="btn primary" type="button" id="saveSettings">Save Settings</button></div>
+  </div>
+</div>
+
+<!-- Logout confirmation -->
+<div class="function-overlay" id="logoutOverlay">
+  <div class="function-window" style="max-width:420px">
+    <div class="eyebrow">ACCOUNT</div><h2>Log out?</h2><p class="subtitle">You will be signed out of this demo session.</p>
+    <div class="form-actions"><button class="btn secondary" id="cancelLogout">Cancel</button><button class="btn primary" id="confirmLogout">Log Out</button></div>
+  </div>
+</div>
+<div class="toast" id="appToast"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    'use strict';
+
+    // =========================
+    // ELEMENTS
+    // =========================
+    const loginOverlay = document.getElementById('loginOverlay');
+    const loginNav = document.getElementById('loginNav');
+    const closeLogin = document.getElementById('closeLogin');
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const errorMessage = document.getElementById('errorMessage');
+
+    const chatOverlay = document.getElementById('chatOverlay');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const chatForm = document.getElementById('chatForm');
+    const aiButton = document.getElementById('aiButton');
+    const aiNav = document.getElementById('aiNav');
+    const closeChat = document.getElementById('closeChat');
+
+    const paymentOverlay = document.getElementById('paymentOverlay');
+    const payNowButton = document.getElementById('payNowButton');
+    const paymentsButton = document.getElementById('payments');
+    const closePayment = document.getElementById('closePayment');
+    const paymentForm = document.getElementById('paymentForm');
+    const paymentAmount = document.getElementById('paymentAmount');
+    const paymentMethod = document.getElementById('paymentMethod');
+    const paymentReference = document.getElementById('paymentReference');
+    const paymentProof = document.getElementById('paymentProof');
+    const paymentSuccess = document.getElementById('paymentSuccess');
+
+    // =========================
+    // HELPERS
+    // =========================
+    function show(element) {
+        if (element) element.classList.add('show');
+    }
+
+    function hide(element) {
+        if (element) element.classList.remove('show');
+    }
+
+    // =========================
+    // LOGIN
+    // =========================
+    if (loginNav) {
+        loginNav.addEventListener('click', function (e) {
+            e.preventDefault();
+            show(loginOverlay);
+            if (usernameInput) usernameInput.focus();
+        });
+    }
+
+   if (closeLogin) {
+
+    closeLogin.addEventListener(
+        'click',
+        function () {
+
+            // Huwag payagan ang guest na isara ang Login
+            if (
+                sessionStorage.getItem('loggedIn')
+                === 'true'
+            ) {
+                hide(loginOverlay);
+            }
+
+        }
+    );
+
+}
+
+    // =========================
+    // MYSQL LOGIN INTEGRATION
+    // =========================
+    const API_BASE = 'backend/';
+
+
+
+    async function parseApiResponse(response) {
+        const text = await response.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            if (text.trim().startsWith('<')) {
+                throw new Error('PHP backend returned an HTML error. Check Apache, MySQL, and backend/config.php.');
+            }
+            throw new Error('Server returned invalid JSON.');
+        }
+        if (!response.ok || data.success === false) {
+            throw new Error(data.message || 'Request failed.');
+        }
+        return data;
+    }
+
+    // =========================
+    // ROLE / ACCESS CONTROL
+    // =========================
+    function currentRole() {
+        return sessionStorage.getItem('role') || 'user';
+    }
+
+    function isAdmin() {
+        return currentRole() === 'admin';
+    }
+
+    function applyRole(role) {
+        role = role === 'admin' ? 'admin' : 'user';
+        sessionStorage.setItem('role', role);
+        document.body.classList.toggle('admin-mode', role === 'admin');
+        document.body.classList.toggle('user-mode', role !== 'admin');
+
+        const badge = document.getElementById('roleBadge');
+        if (badge) badge.textContent = role.toUpperCase();
+
+        const adminNav = document.getElementById('adminNav');
+        if (adminNav) adminNav.style.display = role === 'admin' ? 'flex' : 'none';
+
+        // AI Chat remains available to students, but is hidden/disabled in Admin mode.
+        if (aiButton) aiButton.style.display = role === 'admin' ? 'none' : '';
+        if (aiNav) aiNav.style.display = role === 'admin' ? 'none' : '';
+        if (role === 'admin') hide(chatOverlay);
+
+        // Admin UI: hide the student-facing Payments navigation and the
+        // payment-table Refresh control without removing their code/functions.
+        const paymentsNav = document.getElementById('paymentsNav');
+        if (paymentsNav) paymentsNav.style.display = role === 'admin' ? 'none' : '';
+
+        const paymentOverview = document.getElementById('payment-overview');
+        if (paymentOverview) paymentOverview.style.display = role === 'admin' ? 'none' : '';
+
+        const refreshPayments = document.getElementById('refreshPayments');
+        if (refreshPayments) refreshPayments.style.display = role === 'admin' ? 'none' : '';
+
+        const refreshAdminPayments = document.getElementById('refreshAdminPayments');
+        if (refreshAdminPayments) refreshAdminPayments.style.display = role === 'admin' ? 'none' : '';
+
+        if (role === 'admin') loadAdminDashboard();
+        else {
+            // Refresh student payment data whenever the student session/dashboard opens.
+            setTimeout(function(){ renderPaymentPortal(); }, 0);
+        }
+    }
+
+    function requireAdmin() {
+        if (!isAdmin()) {
+            toast('Admin access required.');
+            return false;
+        }
+        return true;
+    }
+
+   async function loadCurrentUser() {
+
+    try {
+
+        const response = await fetch(
+            API_BASE + 'me.php',
+            {
+                credentials: 'include',
+                cache: 'no-store'
+            }
+        );
+
+        const data = await parseApiResponse(response);
+
+        if (data.success && data.user) {
+            applyRole(data.user.role || 'user');
+
+            sessionStorage.setItem(
+                'loggedIn',
+                'true'
+            );
+
+            sessionStorage.setItem(
+                'username',
+                data.user.username || ''
+            );
+
+            sessionStorage.setItem(
+                'studentId',
+                data.user.student_id || ''
+            );
+
+            const userNameElement =
+                document.querySelector(
+                    '.user span:last-child'
+                );
+
+            const avatar =
+                document.querySelector(
+                    '.avatar'
+                );
+
+            if (userNameElement) {
+
+                userNameElement.textContent =
+                    data.user.full_name ||
+                    data.user.username ||
+                    'Student User';
+            }
+
+            if (avatar) {
+
+                avatar.textContent =
+                    (
+                        data.user.full_name ||
+                        data.user.username ||
+                        'U'
+                    )
+                    .charAt(0)
+                    .toUpperCase();
+            }
+
+            // USER IS LOGGED IN
+            hide(loginOverlay);
+
+            return true;
+        }
+
+    } catch (err) {
+
+        console.warn(
+            'MySQL backend unavailable:',
+            err.message
+        );
+    }
+
+    // =========================
+    // USER IS NOT LOGGED IN
+    // =========================
+
+    sessionStorage.removeItem('loggedIn');
+    sessionStorage.removeItem('username');
+    sessionStorage.removeItem('studentId');
+
+    show(loginOverlay);
+
+    if (usernameInput) {
+        usernameInput.focus();
+    }
+
+    return false;
+}
+    if (loginForm) {
+        loginForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const username = usernameInput ? usernameInput.value.trim() : '';
+            const password = passwordInput ? passwordInput.value.trim() : '';
+
+            if (!username || !password) {
+                if (errorMessage) {
+                    errorMessage.textContent = 'Please enter your username and password.';
+                    errorMessage.style.display = 'block';
+                }
+                return;
+            }
+
+            if (errorMessage) errorMessage.style.display = 'none';
+            const loginButton = document.getElementById('loginButton');
+            if (loginButton) { loginButton.disabled = true; loginButton.textContent = 'Signing in...'; }
+
+            try {
+                const response = await fetch(API_BASE + 'login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await parseApiResponse(response);
+                if (!response.ok || !data.success) throw new Error(data.message || 'Invalid username or password.');
+
+                sessionStorage.setItem('loggedIn', 'true');
+                sessionStorage.setItem('username', data.user.username || username);
+                sessionStorage.setItem('studentId', data.user.student_id || '');
+                sessionStorage.setItem('role', data.user.role || 'user');
+                applyRole(data.user.role || 'user');
+
+                const userNameElement = document.querySelector('.user span:last-child');
+                const avatar = document.querySelector('.avatar');
+                if (userNameElement) userNameElement.textContent = data.user.full_name || username;
+                if (avatar) avatar.textContent = (data.user.full_name || username).charAt(0).toUpperCase();
+                hide(loginOverlay);
+                if (passwordInput) passwordInput.value = '';
+                alert('Login successful! Welcome, ' + (data.user.full_name || username) + '.');
+            } catch (err) {
+                if (errorMessage) {
+                    errorMessage.textContent = err.message || 'Login failed. Make sure Apache and MySQL are running.';
+                    errorMessage.style.display = 'block';
+                }
+            } finally {
+                if (loginButton) { loginButton.disabled = false; loginButton.textContent = 'Sign In'; }
+            }
+        });
+    }
+
+    applyRole(sessionStorage.getItem('role') || 'user');
+    loadCurrentUser();
+
+    // =========================
+    // AI CHAT
+    // =========================
+    async function openChat() {
+        if (isAdmin()) return;
+
+        // Refresh the latest payment summary only when the AI Assistant is opened.
+        // This does not change the existing payment system or database logic.
+        try {
+            await loadStudentPaymentsFromDB();
+            await renderPaymentPortal();
+        } catch (err) {
+            console.warn('AI balance refresh failed:', err.message);
+        }
+
+        show(chatOverlay);
+        if (chatInput) chatInput.focus();
+    }
+
+    function closeChatWindow() {
+        hide(chatOverlay);
+    }
+
+    function addMessage(text, type) {
+        if (!chatMessages) return;
+
+        const div = document.createElement('div');
+        div.className = 'message ' + type;
+        div.textContent = text;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function chatbotReply(question) {
+        const q = question.toLowerCase();
+
+        if (q.includes('balance') || q.includes('how much') || q.includes('saldo') || q.includes('outstanding')) {
+            // Always fetch the latest balance before answering a balance question.
+            // The value comes from student_payments.php, which is the existing
+            // authoritative payment computation in the system.
+            try {
+                await loadStudentPaymentsFromDB();
+                const summary = window.__studentPaymentSummary || {};
+                const outstanding = Number(summary.outstanding);
+
+                if (Number.isFinite(outstanding)) {
+                    return 'Your current outstanding balance is ' + formatMoney(outstanding) + '.';
+                }
+            } catch (err) {
+                console.warn('AI balance calculation failed:', err.message);
+            }
+
+            return 'I could not retrieve your latest outstanding balance right now. Please refresh and try again.';
+        }
+
+        if (q.includes('deadline') || q.includes('due') || q.includes('kailan') || q.includes('deadline')) {
+            return 'Your next payment deadline is August 30, 2026.';
+        }
+
+        if (q.includes('method') || q.includes('pay') || q.includes('payment') || q.includes('gcash') || q.includes('hello money') || q.includes('hma')) {
+            return 'Available payment methods are: GCash, Bank Transfer, Cash, and Hello Money App (HMA). To use HMA, select “Hello Money App (HMA)” in the Payment Method field, enter your payment amount and reference number, then submit your proof of payment for admin verification.';
+        }
+
+        if (q.includes('history') || q.includes('previous payment') || q.includes('nakaraan')) {
+            return 'Your recent verified payments are ₱5,000 on Aug 10, ₱10,000 on Jul 25, and ₱5,000 on Jul 5.';
+        }
+
+        if (q.includes('hello') || q.includes('hi') || q.includes('kumusta')) {
+            return 'Hello! I can help with your balance, payment deadline, payment methods (including Hello Money App/HMA), and payment history.';
+        }
+
+        return 'I can help you with your balance, payment deadline, payment methods (GCash, Bank Transfer, Cash, and Hello Money App/HMA), and payment history. Try one of the quick questions below.';
+    }
+
+    if (aiButton) {
+        aiButton.addEventListener('click', openChat);
+    }
+
+    if (aiNav) {
+        aiNav.addEventListener('click', function (e) {
+            e.preventDefault();
+            openChat();
+        });
+    }
+
+    if (closeChat) {
+        closeChat.addEventListener('click', closeChatWindow);
+    }
+
+    if (chatOverlay) {
+        chatOverlay.addEventListener('click', function (e) {
+            if (e.target === chatOverlay) closeChatWindow();
+        });
+    }
+
+    document.querySelectorAll('.quick-questions button').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const question = button.dataset.question || '';
+            if (!question) return;
+
+            addMessage(question, 'user');
+
+            setTimeout(async function () {
+                addMessage(await chatbotReply(question), 'bot');
+            }, 250);
+        });
+    });
+
+    if (chatForm) {
+        chatForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const question = chatInput ? chatInput.value.trim() : '';
+            if (!question) return;
+
+            addMessage(question, 'user');
+
+            if (chatInput) chatInput.value = '';
+
+            setTimeout(async function () {
+                addMessage(await chatbotReply(question), 'bot');
+            }, 250);
+        });
+    }
+
+    // =========================
+    // PAYMENT PORTAL
+    // =========================
+    // Pay Now opens the actual payment form.
+    function openPaymentForm() {
+        show(paymentOverlay);
+        if (paymentAmount) paymentAmount.focus();
+    }
+
+    function closePaymentWindow() {
+        hide(paymentOverlay);
+    }
+
+    if (payNowButton) {
+        payNowButton.addEventListener('click', openPaymentForm);
+    }
+
+    if (closePayment) {
+        closePayment.addEventListener('click', closePaymentWindow);
+    }
+
+    if (paymentOverlay) {
+        paymentOverlay.addEventListener('click', function (e) {
+            if (e.target === paymentOverlay) closePaymentWindow();
+        });
+    }
+
+    // View Payment Portal now goes to the Payment Overview section
+    // instead of opening the same payment form as "Pay Now".
+    const viewPaymentPortalButton =
+        document.getElementById('viewPaymentPortalButton');
+
+    if (viewPaymentPortalButton) {
+        viewPaymentPortalButton.addEventListener('click', function () {
+            const paymentSection = document.getElementById('payment-overview');
+
+            if (paymentSection) {
+                paymentSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    }
+
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const amount = paymentAmount ? paymentAmount.value.trim() : '';
+            const method = paymentMethod ? paymentMethod.value : '';
+            const reference = paymentReference ? paymentReference.value.trim() : '';
+            const proof = paymentProof ? paymentProof.files[0] : null;
+
+            // Refresh the balance before accepting a new payment so the student
+            // cannot submit more than the current remaining balance.
+            await loadStudentPaymentsFromDB();
+            const currentSummary = window.__studentPaymentSummary || {outstanding:19500};
+            if (Number(amount) > Number(currentSummary.outstanding || 0)) {
+                if (paymentSuccess) {
+                    paymentSuccess.style.display = 'block';
+                    paymentSuccess.style.background = '#fee2e2';
+                    paymentSuccess.style.color = '#b91c1c';
+                    paymentSuccess.textContent = 'Payment amount cannot exceed the current outstanding balance of ' + formatMoney(currentSummary.outstanding) + '.';
+                }
+                return;
+            }
+
+            if (!amount || Number(amount) <= 0 || !method || !reference) {
+                if (paymentSuccess) {
+                    paymentSuccess.style.display = 'block';
+                    paymentSuccess.style.background = '#fee2e2';
+                    paymentSuccess.style.color = '#b91c1c';
+                    paymentSuccess.textContent = 'Please complete the payment amount, payment method, and reference number.';
+                }
+                return;
+            }
+
+            if (paymentSuccess) {
+                paymentSuccess.style.display = 'block';
+                paymentSuccess.style.background = '#dcfce7';
+                paymentSuccess.style.color = '#166534';
+                paymentSuccess.textContent =
+                    'Payment submitted successfully! Reference Number: ' +
+                    reference +
+                    (proof ? ' Proof of payment attached: ' + proof.name : '');
+            }
+
+            // Demo-only local storage. This does NOT process a real payment.
+            const paymentRecord = {
+                id: 'PAY-' + Date.now().toString(36) + '-' +
+                    Math.random().toString(36).slice(2, 7),
+                amount: Number(amount),
+                method: method,
+                reference: reference,
+                proofFileName: proof ? proof.name : '',
+                status: 'Pending Verification',
+                date: new Date().toLocaleString()
+            };
+
+            const existingPayments =
+                JSON.parse(localStorage.getItem('demoPayments') || '[]');
+
+            existingPayments.push(paymentRecord);
+            localStorage.setItem('demoPayments', JSON.stringify(existingPayments));
+
+            // Save the submission to MySQL as well. Local storage remains as a fallback/demo cache.
+            try {
+                const response = await fetch(API_BASE + 'submit_payment.php', {
+                    method:'POST',
+                    credentials:'include',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({
+                        amount:Number(amount),
+                        payment_method:method,
+                        reference_number:reference,
+                        proof_file_name:proof ? proof.name : ''
+                    })
+                });
+                const data = await parseApiResponse(response);
+                if (!data.success) throw new Error(data.message || 'Payment submission failed.');
+
+                paymentForm.reset();
+                window.__studentDbPayments = [];
+                await loadStudentPaymentsFromDB();
+                await renderPaymentPortal();
+            } catch (err) {
+                console.error('Payment submission failed:', err);
+                if (paymentSuccess) {
+                    paymentSuccess.style.background = '#fee2e2';
+                    paymentSuccess.style.color = '#b91c1c';
+                    paymentSuccess.textContent = 'Payment was not saved. ' + (err.message || 'Please try again.');
+                }
+            }
+        });
+    }
+
+
+    // =========================
+    // FULL PAYMENT PORTAL
+    // =========================
+    const portalPayNow = document.getElementById('portalPayNow');
+    const refreshPayments = document.getElementById('refreshPayments');
+    const paymentHistoryBody = document.getElementById('paymentHistoryBody');
+    const transactionCount = document.getElementById('transactionCount');
+    const portalBalance = document.getElementById('portalBalance');
+    const portalStatus = document.getElementById('portalStatus');
+    const portalStatusDetail = document.getElementById('portalStatusDetail');
+    const portalStudent = document.getElementById('portalStudent');
+    const paymentModalBalance = document.getElementById('paymentModalBalance');
+
+    const editPaymentOverlay = document.getElementById('editPaymentOverlay');
+    const editPaymentForm = document.getElementById('editPaymentForm');
+    const editPaymentId = document.getElementById('editPaymentId');
+    const editPaymentAmount = document.getElementById('editPaymentAmount');
+    const editPaymentMethod = document.getElementById('editPaymentMethod');
+    const editPaymentReference = document.getElementById('editPaymentReference');
+    const editPaymentMessage = document.getElementById('editPaymentMessage');
+    const closeEditPayment = document.getElementById('closeEditPayment');
+    const cancelEditPayment = document.getElementById('cancelEditPayment');
+
+    if (portalStudent) {
+        const savedUser = sessionStorage.getItem('username');
+        if (savedUser) portalStudent.textContent = savedUser;
+    }
+
+    function getDemoPayments() {
+        let payments = [];
+        try {
+            payments = JSON.parse(localStorage.getItem('demoPayments') || '[]');
+            if (!Array.isArray(payments)) payments = [];
+        } catch (error) {
+            payments = [];
+        }
+
+        let changed = false;
+        payments = payments.map(function (p) {
+            if (!p.id) {
+                p.id = 'PAY-' + Date.now().toString(36) + '-' +
+                       Math.random().toString(36).slice(2, 7);
+                changed = true;
+            }
+            return p;
+        });
+
+        if (changed) localStorage.setItem('demoPayments', JSON.stringify(payments));
+        return payments;
+    }
+
+    function saveDemoPayments(payments) {
+        localStorage.setItem('demoPayments', JSON.stringify(payments));
+    }
+
+    function escapeHtml(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function formatMoney(value) {
+        return '₱' + Number(value).toLocaleString('en-PH', {
+            minimumFractionDigits: 2, maximumFractionDigits: 2
+        });
+    }
+
+    // Load the logged-in student's real payments from MySQL.
+    // localStorage remains only as a fallback for the existing demo records.
+    async function loadStudentPaymentsFromDB() {
+        try {
+            const response = await fetch(API_BASE + 'student_payments.php', {
+                credentials: 'include',
+                cache: 'no-store'
+            });
+            const data = await parseApiResponse(response);
+            if (data.success && Array.isArray(data.payments)) {
+                window.__studentDbPayments = data.payments;
+                window.__studentPaymentSummary = data.summary || window.__studentPaymentSummary;
+                return data.payments;
+            }
+        } catch (err) {
+            console.warn('Student payment history unavailable:', err.message);
+        }
+        return window.__studentDbPayments || [];
+    }
+
+    async function renderPaymentPortal() {
+        if (!paymentHistoryBody) return;
+
+        const rows = [
+            {date:'Aug 10, 2026', reference:'BLCP-081026-001', method:'GCash', amount:5000, status:'Verified', statusClass:'approved', editable:false},
+            {date:'Jul 25, 2026', reference:'BLCP-072526-002', method:'Bank Transfer', amount:10000, status:'Verified', statusClass:'approved', editable:false},
+            {date:'Jul 5, 2026', reference:'BLCP-070526-003', method:'GCash', amount:5000, status:'Verified', statusClass:'approved', editable:false}
+        ];
+
+        const demoPayments = getDemoPayments();
+        const dbPayments = await loadStudentPaymentsFromDB();
+        const summary = window.__studentPaymentSummary || {
+            total_assessment: 44500,
+            total_paid: 25000,
+            outstanding: 19500,
+            progress: 56.18,
+            verified_paid: 25000
+        };
+
+        // MySQL records are authoritative. Keep localStorage records only when
+        // the backend is unavailable, preserving the original demo behavior.
+        const sourcePayments = dbPayments.length ? dbPayments : demoPayments;
+
+        sourcePayments.slice().reverse().forEach(function(p) {
+            const status = p.status || 'Pending Verification';
+            const isDbRecord = !!dbPayments.length;
+            rows.unshift({
+                date: p.created_at ? new Date(p.created_at).toLocaleString() : (p.date || 'Today'),
+                reference: p.reference_number || p.reference || 'N/A',
+                method: p.payment_method || p.method || 'N/A',
+                amount: Number(p.amount || 0),
+                status: status,
+                statusClass: status === 'Verified' ? 'approved' : (status === 'Rejected' ? 'rejected' : 'pending'),
+                demoId: p.id,
+                dbId: isDbRecord ? p.id : null,
+                editable: isDbRecord || !dbPayments.length
+            });
+        });
+
+        paymentHistoryBody.innerHTML = rows.map(function(p) {
+            return '<tr>' +
+                '<td>'+escapeHtml(p.date)+'</td>' +
+                '<td>'+escapeHtml(p.reference)+'</td>' +
+                '<td>'+escapeHtml(p.method)+'</td>' +
+                '<td>'+formatMoney(p.amount)+'</td>' +
+                '<td><span class="status '+p.statusClass+'">'+escapeHtml(p.status)+'</span></td>' +
+                '<td>' +
+                  '<button type="button" class="table-btn receipt-btn" data-reference="'+escapeHtml(p.reference)+'">View</button>' +
+                '</td>' +
+                '</tr>' +
+                (p.editable && !isAdmin() ? '<tr class="record-action-row"><td colspan="6">' +
+                  '<div class="payment-record-actions">' +
+                  '<button type="button" class="table-btn edit-btn edit-payment-btn" data-id="'+escapeHtml(p.demoId)+'" data-db-id="'+escapeHtml(p.dbId || p.demoId || '')+'">✏ Edit</button>' +
+                  (!p.dbId ? '<button type="button" class="table-btn delete-btn delete-payment-btn" data-id="'+escapeHtml(p.demoId)+'">🗑 Delete</button>' : '') +
+                  '</div></td></tr>' : '');
+        }).join('');
+
+        if (transactionCount) {
+            transactionCount.textContent = rows.length + (rows.length === 1 ? ' transaction' : ' transactions');
+        }
+
+        if (portalBalance) portalBalance.textContent = formatMoney(summary.outstanding);
+        if (paymentModalBalance) paymentModalBalance.textContent = formatMoney(summary.outstanding);
+
+        const progressPercent = Number(summary.progress || 0);
+        const progressLabel = document.getElementById('capstonePaymentPercent');
+        const progressBar = document.getElementById('capstoneProgressBar');
+        if (progressLabel) progressLabel.textContent = Math.round(progressPercent) + '% PAID';
+        if (progressBar) progressBar.style.width = Math.min(100, progressPercent) + '%';
+        const miniValues = document.querySelectorAll('.capstone-mini strong');
+        if (miniValues.length >= 3) {
+            miniValues[0].textContent = formatMoney(summary.total_assessment);
+            miniValues[1].textContent = formatMoney(summary.total_paid);
+            miniValues[2].textContent = formatMoney(summary.outstanding);
+        }
+
+        const currentPayments = (window.__studentDbPayments && window.__studentDbPayments.length)
+            ? window.__studentDbPayments
+            : demoPayments;
+        const latest = currentPayments[0];
+        const pending = !!latest && latest.status === 'Pending Verification';
+        if (portalStatus) portalStatus.textContent = latest ? (latest.status || 'Pending') : 'Pending';
+        if (portalStatusDetail) portalStatusDetail.textContent =
+            pending ? 'Latest payment is awaiting verification' :
+            latest ? 'Latest payment status: ' + (latest.status || 'Pending') :
+            'Awaiting payment';
+
+        document.querySelectorAll('.receipt-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                alert(
+                    'PAYMENT RECEIPT\n\n' +
+                    'Reference Number: ' + (button.dataset.reference || 'N/A') +
+                    '\nStatus: Payment record available\n\n' +
+                    'Demo receipt: a real downloadable receipt requires a backend.'
+                );
+            });
+        });
+
+        document.querySelectorAll('.edit-payment-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                if (button.dataset.dbId) {
+                    openEditDbPayment(button.dataset.dbId);
+                } else {
+                    openEditPayment(button.dataset.id);
+                }
+            });
+        });
+
+        document.querySelectorAll('.delete-payment-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                deletePayment(button.dataset.id);
+            });
+        });
+    }
+
+    function showEditMessage(text, success) {
+        if (!editPaymentMessage) return;
+        editPaymentMessage.style.display = 'block';
+        editPaymentMessage.style.background = success ? '#dcfce7' : '#fee2e2';
+        editPaymentMessage.style.color = success ? '#166534' : '#b91c1c';
+        editPaymentMessage.textContent = text;
+    }
+
+    async function openEditDbPayment(id) {
+        const payment = (window.__studentDbPayments || []).find(function(p) {
+            return String(p.id) === String(id);
+        });
+
+        if (!payment) {
+            alert('Payment record not found. Please refresh the payment history.');
+            return;
+        }
+
+        editPaymentId.value = payment.id;
+        editPaymentAmount.value = payment.amount;
+        editPaymentMethod.value = payment.payment_method || '';
+        editPaymentReference.value = payment.reference_number || '';
+        editPaymentMessage.style.display = 'none';
+
+        show(editPaymentOverlay);
+        editPaymentAmount.focus();
+    }
+
+    function openEditPayment(id) {
+        const payment = getDemoPayments().find(function(p) {
+            return String(p.id) === String(id);
+        });
+
+        if (!payment) {
+            alert('Payment record not found.');
+            return;
+        }
+
+        editPaymentId.value = payment.id;
+        editPaymentAmount.value = payment.amount;
+        editPaymentMethod.value = payment.method || '';
+        editPaymentReference.value = payment.reference || '';
+        editPaymentMessage.style.display = 'none';
+
+        show(editPaymentOverlay);
+        editPaymentAmount.focus();
+    }
+
+    function closeEditPaymentWindow() {
+        hide(editPaymentOverlay);
+        if (editPaymentForm) editPaymentForm.reset();
+        if (editPaymentMessage) editPaymentMessage.style.display = 'none';
+    }
+
+    function deletePayment(id) {
+        const payments = getDemoPayments();
+        const payment = payments.find(function(p) {
+            return String(p.id) === String(id);
+        });
+
+        if (!payment) {
+            alert('Payment record not found.');
+            return;
+        }
+
+        if (!confirm(
+            'Delete this payment record?\n\n' +
+            'Reference: ' + (payment.reference || 'N/A') +
+            '\nAmount: ' + formatMoney(payment.amount) +
+            '\n\nThis action cannot be undone.'
+        )) return;
+
+        saveDemoPayments(payments.filter(function(p) {
+            return String(p.id) !== String(id);
+        }));
+
+        renderPaymentPortal();
+    }
+
+    if (editPaymentForm) {
+        editPaymentForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const id = editPaymentId.value;
+            const amount = Number(editPaymentAmount.value);
+            const method = editPaymentMethod.value;
+            const reference = editPaymentReference.value.trim();
+
+            if (!id || !amount || amount <= 0 || !method || !reference) {
+                showEditMessage('Please complete all required fields.', false);
+                return;
+            }
+
+            // MySQL-backed payment records are the real student history.
+            const dbPayment = (window.__studentDbPayments || []).find(function(p) {
+                return String(p.id) === String(id);
+            });
+
+            if (dbPayment) {
+                try {
+                    const response = await fetch(API_BASE + 'student_update_payment.php', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({
+                            id: Number(id),
+                            payment_id: Number(id),
+                            amount: amount,
+                            payment_method: method,
+                            reference_number: reference
+                        })
+                    });
+                    const data = await parseApiResponse(response);
+                    if (!response.ok || !data.success) throw new Error(data.message || 'Unable to update payment.');
+
+                    showEditMessage('Payment information updated. It is now Pending Verification for admin review.', true);
+                    await loadStudentPaymentsFromDB();
+                    await renderPaymentPortal();
+                    setTimeout(closeEditPaymentWindow, 900);
+                } catch (err) {
+                    showEditMessage(err.message || 'Unable to update payment.', false);
+                }
+                return;
+            }
+
+            // Keep the existing local/demo behavior as a fallback.
+            const payments = getDemoPayments();
+            const index = payments.findIndex(function(p) {
+                return String(p.id) === String(id);
+            });
+
+            if (index === -1) {
+                showEditMessage('Payment record not found.', false);
+                return;
+            }
+
+            payments[index].amount = amount;
+            payments[index].method = method;
+            payments[index].reference = reference;
+            payments[index].lastEdited = new Date().toLocaleString();
+
+            saveDemoPayments(payments);
+            await renderPaymentPortal();
+            showEditMessage('Payment record updated successfully.', true);
+
+            setTimeout(closeEditPaymentWindow, 700);
+        });
+    }
+
+    if (closeEditPayment) closeEditPayment.addEventListener('click', closeEditPaymentWindow);
+    if (cancelEditPayment) cancelEditPayment.addEventListener('click', closeEditPaymentWindow);
+
+    if (editPaymentOverlay) {
+        editPaymentOverlay.addEventListener('click', function(e) {
+            if (e.target === editPaymentOverlay) closeEditPaymentWindow();
+        });
+    }
+
+    if (portalPayNow) portalPayNow.addEventListener('click', openPaymentForm);
+    if (refreshPayments) {
+        refreshPayments.addEventListener('click', async function() {
+            await renderPaymentPortal();
+            refreshPayments.textContent = '✓ Updated';
+            setTimeout(function(){ refreshPayments.textContent = '↻ Refresh'; }, 1200);
+        });
+    }
+
+    renderPaymentPortal();
+
+    // =========================
+    // PROFILE / HISTORY / SETTINGS
+    // =========================
+    const profileNav = document.getElementById('profileNav');
+    const paymentsNav = document.getElementById('paymentsNav');
+    const historyNav = document.getElementById('historyNav');
+    const alertsNav = document.getElementById('alertsNav');
+    const settingsNav = document.getElementById('settingsNav');
+    const profileOverlay = document.getElementById('profileOverlay');
+    const historyOverlay = document.getElementById('historyOverlay');
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    const logoutOverlay = document.getElementById('logoutOverlay');
+    const profileForm = document.getElementById('profileForm');
+    const historyList = document.getElementById('historyList');
+    const appToast = document.getElementById('appToast');
+
+    const profileFields = {
+        name: document.getElementById('profileName'),
+        studentId: document.getElementById('profileStudentId'),
+        program: document.getElementById('profileProgram'),
+        year: document.getElementById('profileYear'),
+        email: document.getElementById('profileEmail'),
+        phone: document.getElementById('profilePhone')
+    };
+
+    function toast(message) {
+        if (!appToast) return;
+        appToast.textContent = message;
+        appToast.classList.add('show');
+        setTimeout(function(){ appToast.classList.remove('show'); }, 1800);
+    }
+
+    function getProfile() {
+        const defaults = {
+            name: sessionStorage.getItem('username') || 'Student User',
+            studentId: 'BLCP-2026-0001',
+            program: 'BS Information Technology',
+            year: '4th Year',
+            email: '', phone: ''
+        };
+        try { return Object.assign(defaults, JSON.parse(localStorage.getItem('studentProfile') || '{}')); }
+        catch(e) { return defaults; }
+    }
+
+    function saveProfile(data) { localStorage.setItem('studentProfile', JSON.stringify(data)); }
+
+    function updateUserDisplay() {
+        const profile = getProfile();
+        const userNameElement = document.querySelector('.user span:last-child');
+        const avatar = document.querySelector('.avatar');
+        const portalStudentEl = document.getElementById('portalStudent');
+        if (userNameElement) userNameElement.textContent = profile.name || 'Student User';
+        if (avatar) avatar.textContent = (profile.name || 'U').charAt(0).toUpperCase();
+        if (portalStudentEl) portalStudentEl.textContent = profile.name || 'Student Account';
+    }
+
+    function openProfile() {
+        const p = getProfile();
+        Object.keys(profileFields).forEach(function(key){ if(profileFields[key]) profileFields[key].value = p[key] || ''; });
+        show(profileOverlay);
+    }
+
+    async function openHistory() {
+        // Always fetch the latest records before opening the history modal.
+        await renderPaymentPortal();
+        const builtIn = [
+            {date:'Aug 10, 2026', ref:'BLCP-081026-001', method:'GCash', amount:5000, status:'Verified'},
+            {date:'Jul 25, 2026', ref:'BLCP-072526-002', method:'Bank Transfer', amount:10000, status:'Verified'},
+            {date:'Jul 5, 2026', ref:'BLCP-070526-003', method:'GCash', amount:5000, status:'Verified'}
+        ];
+        const db = Array.isArray(window.__studentDbPayments) ? window.__studentDbPayments : [];
+        const demo = getDemoPayments();
+        const submitted = db.length ? db.map(function(p){
+            return {date:p.created_at ? new Date(p.created_at).toLocaleString() : 'Today', ref:p.reference_number || 'N/A', method:p.payment_method || 'N/A', amount:Number(p.amount||0), status:p.status || 'Pending Verification'};
+        }) : demo.map(function(p){
+            return {date:p.date || 'Today', ref:p.reference || 'N/A', method:p.method || 'N/A', amount:Number(p.amount||0), status:p.status || 'Pending Verification'};
+        });
+        const all = submitted.concat(builtIn);
+        historyList.innerHTML = all.length ? all.map(function(p){
+            return '<div class="history-item"><div><strong>'+escapeHtml(p.ref)+'</strong><small>'+escapeHtml(p.date)+' • '+escapeHtml(p.method)+'</small></div><div style="text-align:right"><strong>'+formatMoney(p.amount)+'</strong><small>'+escapeHtml(p.status)+'</small></div></div>';
+        }).join('') : '<p class="muted">No payment records yet.</p>';
+        show(historyOverlay);
+    }
+
+    function loadSettings() {
+        let settings = {};
+        try { settings = JSON.parse(localStorage.getItem('studentSettings') || '{}'); } catch(e) {}
+        document.getElementById('darkModeSetting').checked = !!settings.darkMode;
+        document.getElementById('notificationSetting').checked = settings.notifications !== false;
+        document.getElementById('autosaveSetting').checked = settings.autosave !== false;
+        document.body.classList.toggle('dark-mode', !!settings.darkMode);
+    }
+
+    function openSettings() { loadSettings(); show(settingsOverlay); }
+
+    if (profileNav) profileNav.addEventListener('click', function(e){e.preventDefault(); openProfile();});
+    if (paymentsNav) paymentsNav.addEventListener('click', async function(e){e.preventDefault(); await renderPaymentPortal(); document.getElementById('payment-overview').scrollIntoView({behavior:'smooth',block:'start'});});
+    if (historyNav) historyNav.addEventListener('click', function(e){e.preventDefault(); openHistory();});
+    if (alertsNav) alertsNav.addEventListener('click', function(e){e.preventDefault(); alert('Notifications:\n\n• Payment deadline: August 30, 2026\n• Account status: Active');});
+    if (settingsNav) settingsNav.addEventListener('click', function(e){e.preventDefault(); openSettings();});
+
+    if (profileForm) profileForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        const p = {name:profileFields.name.value.trim(), studentId:profileFields.studentId.value.trim(), program:profileFields.program.value.trim(), year:profileFields.year.value, email:profileFields.email.value.trim(), phone:profileFields.phone.value.trim()};
+        if (!p.name || !p.studentId || !p.program) { toast('Please complete the required fields.'); return; }
+        saveProfile(p); updateUserDisplay(); hide(profileOverlay); toast('Profile saved successfully.');
+    });
+
+    document.getElementById('cancelProfile').addEventListener('click', function(){hide(profileOverlay);});
+    document.getElementById('closeProfile').addEventListener('click', function(){hide(profileOverlay);});
+    document.getElementById('closeHistory').addEventListener('click', function(){hide(historyOverlay);});
+    document.getElementById('closeSettings').addEventListener('click', function(){hide(settingsOverlay);});
+    [profileOverlay,historyOverlay,settingsOverlay].forEach(function(o){ if(o) o.addEventListener('click', function(e){if(e.target===o) hide(o);}); });
+
+    document.getElementById('saveSettings').addEventListener('click', function(){
+        const settings = {darkMode:document.getElementById('darkModeSetting').checked, notifications:document.getElementById('notificationSetting').checked, autosave:document.getElementById('autosaveSetting').checked};
+        localStorage.setItem('studentSettings', JSON.stringify(settings));
+        document.body.classList.toggle('dark-mode', settings.darkMode);
+        hide(settingsOverlay); toast('Settings saved successfully.');
+    });
+
+    // Login / logout state
+    const logoutNav = document.getElementById('loginNav');
+    const originalLoginText = logoutNav ? logoutNav.querySelector('span:last-child') : null;
+    function updateLoginButton() {
+        const loggedIn = sessionStorage.getItem('loggedIn') === 'true';
+        if (originalLoginText) originalLoginText.textContent = loggedIn ? 'Logout' : 'Login';
+    }
+    if (logoutNav) logoutNav.addEventListener('click', function(e){
+        if (sessionStorage.getItem('loggedIn') === 'true') {
+            e.preventDefault(); show(logoutOverlay);
+        }
+    });
+    document.getElementById('cancelLogout').addEventListener('click', function(){hide(logoutOverlay);});
+    document.getElementById('confirmLogout').addEventListener('click', function(){
+        sessionStorage.removeItem('loggedIn'); sessionStorage.removeItem('username'); sessionStorage.removeItem('studentId'); sessionStorage.removeItem('role'); document.body.classList.remove('admin-mode');
+        fetch(API_BASE + 'logout.php', {credentials:'include'}).catch(()=>{}); hide(logoutOverlay); updateLoginButton();
+        const nameEl=document.querySelector('.user span:last-child'); const avatar=document.querySelector('.avatar');
+        if(nameEl) nameEl.textContent='Student User'; if(avatar) avatar.textContent='U';
+        toast('You have been logged out.');
+    });
+    updateLoginButton();
+    updateUserDisplay();
+    loadSettings();
+
+    // Automatic refresh: whenever the student returns to the tab/window,
+    // reload payment history and recompute the balance from MySQL.
+    document.addEventListener('visibilitychange', function(){
+        if (!document.hidden && !isAdmin()) renderPaymentPortal();
+    });
+
+    // =========================
+    // SIDEBAR NAVIGATION
+    // =========================
+    document.querySelectorAll('.nav a, .nav button').forEach(function (link) {
+        link.addEventListener('click', function () {
+            document.querySelectorAll('.nav a, .nav button').forEach(function (item) {
+                item.classList.remove('active');
+            });
+
+            link.classList.add('active');
+        });
+    });
+
+    // =========================
+    // TOP NOTIFICATION BUTTON
+    // =========================
+    const notificationButton = document.querySelector('.icon-btn');
+
+    if (notificationButton) {
+        notificationButton.style.cursor = 'pointer';
+
+        notificationButton.addEventListener('click', function () {
+            alert('Notifications:\n\n• Payment deadline: August 30, 2026\n• Account status: Active');
+        });
+    }
+
+
+    // =========================
+    // ADMIN DASHBOARD
+    // =========================
+    async function adminFetch(endpoint, options) {
+        if (!requireAdmin()) return null;
+        const response = await fetch(API_BASE + endpoint, Object.assign({
+            credentials: 'include',
+            cache: 'no-store',
+            headers: {'Content-Type':'application/json'}
+        }, options || {}));
+        const data = await parseApiResponse(response);
+        if (!response.ok || !data.success) throw new Error(data.message || 'Admin request failed.');
+        return data;
+    }
+
+    async function loadAdminDashboard() {
+        if (!isAdmin()) return;
+        try {
+            const [users, payments] = await Promise.all([
+                adminFetch('admin_users.php'),
+                adminFetch('admin_payments.php')
+            ]);
+            if (!users || !payments) return;
+
+            adminUserCache = users.users || [];
+            const usersBody = document.getElementById('adminUsersBody');
+            if (usersBody) {
+                usersBody.innerHTML = (users.users || []).map(u =>
+                    '<tr><td>'+escapeHtml(u.id)+'</td>' +
+                    '<td>'+escapeHtml(u.username)+'</td>' +
+                    '<td>'+escapeHtml(u.full_name || '')+'</td>' +
+                    '<td>'+escapeHtml(u.student_id || '')+'</td>' +
+                    '<td><span class="status-chip">'+escapeHtml(u.role)+'</span></td>' +
+                    '<td><span class="capstone-badge '+(u.status === 'Active' ? 'green' : 'red')+'">'+escapeHtml(u.status || 'Active')+'</span></td>' +
+                    '<td><div class="admin-row-actions">' +
+                    '<button type="button" class="btn ghost admin-edit-user" data-user-id="'+u.id+'">Edit</button>' +
+                    '<button type="button" class="btn ghost admin-reset-user" data-user-id="'+u.id+'">Reset</button>' +
+                    '<button type="button" class="btn '+(u.status === 'Active' ? 'danger' : 'success')+' admin-toggle-user" data-user-id="'+u.id+'" data-status="'+(u.status === 'Active' ? 'Inactive' : 'Active')+'">'+(u.status === 'Active' ? 'Deactivate' : 'Activate')+'</button>' +
+                    '<button type="button" class="btn danger admin-delete-user" data-user-id="'+u.id+'">Delete</button>' +
+                    '</div></td></tr>'
+                ).join('') || '<tr><td colspan="6">No users found.</td></tr>';
+            }
+
+            const paymentsBody = document.getElementById('adminPaymentsBody');
+            const list = payments.payments || [];
+            if (paymentsBody) {
+                paymentsBody.innerHTML = list.map(p =>
+                    '<tr><td>'+escapeHtml(p.created_at || '')+'</td>' +
+                    '<td>'+escapeHtml(p.full_name || p.username || '')+'</td>' +
+                    '<td>'+escapeHtml(p.reference_number || '')+'</td>' +
+                    '<td>'+escapeHtml(p.payment_method || '')+'</td>' +
+                    '<td>'+formatMoney(p.amount)+'</td>' +
+                    '<td><span class="status '+(p.status === 'Verified' ? 'approved' : (p.status === 'Rejected' ? 'rejected' : 'pending'))+'">'+escapeHtml(p.status)+'</span></td>' +
+                    '<td><div class="admin-actions">' +
+                    (p.status !== 'Verified' ? '<button class="btn success admin-verify" data-id="'+p.id+'" type="button">Approve</button>' : '') +
+                    (p.status !== 'Rejected' ? '<button class="btn danger admin-reject" data-id="'+p.id+'" type="button">Reject</button>' : '') +
+                    '</div></td></tr>'
+                ).join('') || '<tr><td colspan="7">No payment submissions found.</td></tr>';
+            }
+
+            const pending = list.filter(p => p.status === 'Pending Verification').length;
+            const verified = list.filter(p => p.status === 'Verified').length;
+            const collected = list.filter(p => p.status === 'Verified')
+                .reduce((sum,p) => sum + Number(p.amount || 0), 0);
+
+            document.getElementById('adminUserCount').textContent = (users.users || []).length;
+            document.getElementById('adminPendingCount').textContent = pending;
+            document.getElementById('adminVerifiedCount').textContent = verified;
+            document.getElementById('adminCollected').textContent = formatMoney(collected);
+            const rejected = list.filter(p => p.status === 'Rejected').length;
+            const total = Math.max(list.length, 1);
+            document.getElementById('adminPendingBarText').textContent = pending;
+            document.getElementById('adminVerifiedBarText').textContent = verified;
+            document.getElementById('adminRejectedBarText').textContent = rejected;
+            document.getElementById('adminPendingBar').style.width = ((pending/total)*100) + '%';
+            document.getElementById('adminVerifiedBar').style.width = ((verified/total)*100) + '%';
+            document.getElementById('adminRejectedBar').style.width = ((rejected/total)*100) + '%';
+            if (typeof filterAdminTables === 'function') filterAdminTables();
+
+            document.querySelectorAll('.admin-verify').forEach(btn => {
+                btn.addEventListener('click', () => updateAdminPayment(btn.dataset.id, 'Verified'));
+            });
+            document.querySelectorAll('.admin-reject').forEach(btn => {
+                btn.addEventListener('click', () => updateAdminPayment(btn.dataset.id, 'Rejected'));
+            });
+            if (typeof wireStudentCrudButtons === 'function') wireStudentCrudButtons();
+        } catch (err) {
+            toast(err.message || 'Unable to load admin data.');
+        }
+    }
+
+    async function updateAdminPayment(id, status) {
+        try {
+            await adminFetch('admin_update_payment.php', {
+                method:'POST',
+                body: JSON.stringify({id:Number(id), status:status})
+            });
+            toast('Payment marked as ' + status + '.');
+            await loadAdminDashboard();
+            await renderPaymentPortal();
+        } catch (err) {
+            toast(err.message || 'Unable to update payment.');
+        }
+    }
+
+    const adminNav = document.getElementById('adminNav');
+    if (adminNav) {
+        adminNav.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!requireAdmin()) return;
+            document.getElementById('adminDashboard').scrollIntoView({behavior:'smooth', block:'start'});
+            loadAdminDashboard();
+        });
+    }
+
+    const refreshAdminUsers = document.getElementById('refreshAdminUsers');
+    const refreshAdminPayments = document.getElementById('refreshAdminPayments');
+    if (refreshAdminUsers) refreshAdminUsers.addEventListener('click', loadAdminDashboard);
+    if (refreshAdminPayments) refreshAdminPayments.addEventListener('click', loadAdminDashboard);
+
+
+
+    // =========================================================
+    // ADMIN STUDENT CRUD
+    // =========================================================
+    let adminUserCache = [];
+
+    async function adminUserAction(payload) {
+        const response = await fetch(API_BASE + 'admin_user_action.php', {
+            method:'POST',
+            credentials:'include',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(payload)
+        });
+        return await parseApiResponse(response);
+    }
+
+    function openStudentModal(user) {
+        if (!requireAdmin()) return;
+        const modal = document.getElementById('studentModal');
+        const form = document.getElementById('studentForm');
+        form.reset();
+
+        document.getElementById('studentFormId').value = user?.id || '';
+        document.getElementById('studentUsername').value = user?.username || '';
+        document.getElementById('studentId').value = user?.student_id || '';
+        document.getElementById('studentFullName').value = user?.full_name || '';
+        document.getElementById('studentAccountStatus').value = user?.status || 'Active';
+        document.getElementById('studentPassword').value = '';
+        document.getElementById('studentPassword').placeholder = user ? 'Leave blank to keep current password' : 'At least 6 characters';
+        document.getElementById('studentPassword').required = !user;
+        document.getElementById('studentModalTitle').textContent = user ? 'Edit Student' : 'Add Student';
+        show(modal);
+    }
+
+    function closeStudentModal() {
+        hide(document.getElementById('studentModal'));
+    }
+
+    async function saveStudent(e) {
+        e.preventDefault();
+        if (!requireAdmin()) return;
+
+        const id = document.getElementById('studentFormId').value;
+        const payload = {
+            action: id ? 'update' : 'create',
+            id: id ? Number(id) : null,
+            username: document.getElementById('studentUsername').value.trim(),
+            student_id: document.getElementById('studentId').value.trim(),
+            full_name: document.getElementById('studentFullName').value.trim(),
+            password: document.getElementById('studentPassword').value,
+            status: document.getElementById('studentAccountStatus').value
+        };
+
+        if (!payload.username || !payload.full_name) {
+            toast('Username and full name are required.');
+            return;
+        }
+        if (!id && payload.password.length < 6) {
+            toast('New student password must be at least 6 characters.');
+            return;
+        }
+
+        try {
+            await adminUserAction(payload);
+            closeStudentModal();
+            toast(id ? 'Student account updated.' : 'Student account created.');
+            addAudit((id ? 'Updated' : 'Created') + ' student account: ' + payload.username);
+            loadAdminDashboard();
+        } catch (err) {
+            toast(err.message || 'Unable to save student.');
+        }
+    }
+
+    function openResetPassword(user) {
+        if (!requireAdmin()) return;
+        document.getElementById('resetPasswordUserId').value = user.id;
+        document.getElementById('resetPasswordStudentName').textContent = user.full_name || user.username;
+        document.getElementById('resetPasswordValue').value = '';
+        show(document.getElementById('resetPasswordModal'));
+    }
+
+    async function resetStudentPassword(e) {
+        e.preventDefault();
+        if (!requireAdmin()) return;
+        const id = Number(document.getElementById('resetPasswordUserId').value);
+        const password = document.getElementById('resetPasswordValue').value;
+        if (password.length < 6) {
+            toast('Password must be at least 6 characters.');
+            return;
+        }
+        try {
+            await adminUserAction({action:'reset_password', id, password});
+            hide(document.getElementById('resetPasswordModal'));
+            toast('Password reset successfully.');
+            addAudit('Reset password for student account #' + id);
+        } catch (err) {
+            toast(err.message || 'Unable to reset password.');
+        }
+    }
+
+    async function toggleStudentStatus(id, status) {
+        if (!requireAdmin()) return;
+        const action = status === 'Inactive' ? 'deactivate' : 'activate';
+        try {
+            await adminUserAction({action, id});
+            toast('Student account is now ' + status + '.');
+            addAudit((status === 'Active' ? 'Activated' : 'Deactivated') + ' student account #' + id);
+            loadAdminDashboard();
+        } catch (err) {
+            toast(err.message || 'Unable to update account status.');
+        }
+    }
+
+    async function deleteStudent(id) {
+        if (!requireAdmin()) return;
+        const user = adminUserCache.find(u => Number(u.id) === Number(id));
+        if (!user) {
+            toast('Student account not found.');
+            return;
+        }
+
+        const name = user.full_name || user.username || ('Student #' + id);
+        const confirmed = window.confirm(
+            'Delete student account for ' + name + '?\n\n' +
+            'This will permanently remove the student account and its payment records. This action cannot be undone.'
+        );
+        if (!confirmed) return;
+
+        try {
+            await adminUserAction({action:'delete', id:Number(id)});
+            toast('Student account deleted successfully.');
+            addAudit('Deleted student account: ' + (user.username || name));
+            loadAdminDashboard();
+        } catch (err) {
+            toast(err.message || 'Unable to delete student account.');
+        }
+    }
+
+    function wireStudentCrudButtons() {
+        document.querySelectorAll('.admin-edit-user').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const user = adminUserCache.find(u => Number(u.id) === Number(btn.dataset.userId));
+                if (user) openStudentModal(user);
+            });
+        });
+        document.querySelectorAll('.admin-reset-user').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const user = adminUserCache.find(u => Number(u.id) === Number(btn.dataset.userId));
+                if (user) openResetPassword(user);
+            });
+        });
+        document.querySelectorAll('.admin-toggle-user').forEach(btn => {
+            btn.addEventListener('click', () => toggleStudentStatus(Number(btn.dataset.userId), btn.dataset.status));
+        });
+        document.querySelectorAll('.admin-delete-user').forEach(btn => {
+            btn.addEventListener('click', () => deleteStudent(Number(btn.dataset.userId)));
+        });
+    }
+
+    // =========================================================
+    // CAPSTONE FEATURES — SAFE FRONTEND ENHANCEMENTS
+    // =========================================================
+    function addAudit(message) {
+        const log = document.getElementById('adminAuditLog');
+        if (!log) return;
+        const item = document.createElement('div');
+        item.className = 'audit-item';
+        item.innerHTML = '<span class="audit-dot"></span><div><strong></strong><small></small></div>';
+        item.querySelector('strong').textContent = message;
+        item.querySelector('small').textContent = new Date().toLocaleString();
+        log.prepend(item);
+        while (log.children.length > 6) log.lastElementChild.remove();
+    }
+
+    function filterAdminTables() {
+        const studentSearch = (document.getElementById('adminStudentSearch')?.value || '').toLowerCase();
+        const studentStatus = document.getElementById('adminStudentStatus')?.value || '';
+        document.querySelectorAll('#adminUsersBody tr').forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const statusOk = !studentStatus || text.includes(studentStatus.toLowerCase());
+            row.style.display = text.includes(studentSearch) && statusOk ? '' : 'none';
+        });
+
+        const paymentSearch = (document.getElementById('adminPaymentSearch')?.value || '').toLowerCase();
+        const paymentStatus = document.getElementById('adminPaymentStatus')?.value || '';
+        document.querySelectorAll('#adminPaymentsBody tr').forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const statusOk = !paymentStatus || text.includes(paymentStatus.toLowerCase()) ||
+                (paymentStatus === 'Pending Verification' && text.includes('pending'));
+            row.style.display = text.includes(paymentSearch) && statusOk ? '' : 'none';
+        });
+
+        const visibleStudents = [...document.querySelectorAll('#adminUsersBody tr')].filter(r => r.style.display !== 'none').length;
+        const visiblePayments = [...document.querySelectorAll('#adminPaymentsBody tr')].filter(r => r.style.display !== 'none').length;
+        const sr = document.getElementById('adminStudentResultCount');
+        const pr = document.getElementById('adminPaymentResultCount');
+        if (sr) sr.textContent = visibleStudents + ' students';
+        if (pr) pr.textContent = visiblePayments + ' payments';
+    }
+
+    function downloadCSV(filename, rows) {
+        const csv = rows.map(row => row.map(v => '"' + String(v ?? '').replaceAll('"','""') + '"').join(',')).join('\n');
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function capstoneExportPayments() {
+        if (!isAdmin()) return;
+        const rows = [['Date','Student','Reference','Method','Amount','Status']];
+        document.querySelectorAll('#adminPaymentsBody tr').forEach(row => {
+            if (row.style.display === 'none') return;
+            const cells = [...row.querySelectorAll('td')].slice(0,6).map(td => td.textContent.trim());
+            if (cells.length) rows.push(cells);
+        });
+        downloadCSV('payment-report.csv', rows);
+        addAudit('Payment report exported');
+        toast('Payment report exported successfully.');
+    }
+
+    function openAnnouncementModal() {
+        if (!requireAdmin()) return;
+        show(document.getElementById('announcementModal'));
+    }
+
+    function publishAnnouncement(e) {
+        e.preventDefault();
+        if (!requireAdmin()) return;
+        const title = document.getElementById('announcementTitle')?.value.trim();
+        const message = document.getElementById('announcementMessage')?.value.trim();
+        if (!title || !message) return;
+
+        const notices = JSON.parse(localStorage.getItem('capstoneAnnouncements') || '[]');
+        notices.unshift({title, message, date:new Date().toLocaleString()});
+        localStorage.setItem('capstoneAnnouncements', JSON.stringify(notices.slice(0,10)));
+        renderStudentAnnouncements();
+        hide(document.getElementById('announcementModal'));
+        e.target.reset();
+        addAudit('Published announcement: ' + title);
+        toast('Announcement published.');
+    }
+
+    function renderStudentAnnouncements() {
+        const list = document.getElementById('studentNoticeList');
+        if (!list) return;
+        const notices = JSON.parse(localStorage.getItem('capstoneAnnouncements') || '[]');
+        if (!notices.length) return;
+        list.innerHTML = notices.slice(0,4).map(n =>
+            '<div class="capstone-alert"><div class="capstone-alert-icon">📢</div><div><strong></strong><small></small></div></div>'
+        ).join('');
+        const items = list.querySelectorAll('.capstone-alert');
+        notices.slice(0,4).forEach((n,i) => {
+            items[i].querySelector('strong').textContent = n.title;
+            items[i].querySelector('small').textContent = n.message + ' • ' + n.date;
+        });
+    }
+
+    function printPaymentReceiptFromRow(button) {
+        const row = button.closest('tr');
+        if (!row) return;
+        const cells = [...row.querySelectorAll('td')].map(td => td.textContent.trim());
+        const receipt = window.open('', '_blank', 'width=700,height=700');
+        if (!receipt) return;
+        receipt.document.write(`
+          <html><head><title>Payment Receipt</title>
+          <style>body{font-family:Arial;padding:40px;color:#172033}h1{color:#1d4ed8}.box{border:1px solid #ddd;border-radius:12px;padding:20px;margin-top:20px}p{padding:7px 0;border-bottom:1px solid #eee}</style>
+          </head><body><h1>BESTLINK COLLEGE</h1><h2>Payment Receipt</h2>
+          <div class="box"><p><b>Date:</b> ${escapeHtml(cells[0]||'')}</p>
+          <p><b>Reference:</b> ${escapeHtml(cells[1]||'')}</p>
+          <p><b>Method:</b> ${escapeHtml(cells[2]||'')}</p>
+          <p><b>Amount:</b> ${escapeHtml(cells[3]||'')}</p>
+          <p><b>Status:</b> ${escapeHtml(cells[4]||'')}</p></div>
+          <p style="margin-top:30px;font-size:12px;color:#64748b">Generated by AI-Powered Student Management System.</p>
+          <scr" + "ipt>window.print();</scr" + "ipt></body></html>`);
+        receipt.document.close();
+    }
+
+    // User quick actions
+    document.getElementById('capstoneQuickPay')?.addEventListener('click', function(){
+        const btn = document.getElementById('portalPayNow') || document.getElementById('payNowButton');
+        if (btn) btn.click();
+    });
+    document.getElementById('capstoneViewHistory')?.addEventListener('click', function(){
+        const btn = document.getElementById('historyNav');
+        if (btn) btn.click();
+    });
+    document.getElementById('capstoneAskAI')?.addEventListener('click', function(){
+        if (typeof openChat === 'function') openChat();
+        else document.getElementById('aiButton')?.click();
+    });
+
+    document.getElementById('adminStudentSearch')?.addEventListener('input', filterAdminTables);
+    document.getElementById('adminStudentStatus')?.addEventListener('change', filterAdminTables);
+    document.getElementById('adminPaymentSearch')?.addEventListener('input', filterAdminTables);
+    document.getElementById('adminPaymentStatus')?.addEventListener('change', filterAdminTables);
+
+    document.getElementById('adminRefreshAll')?.addEventListener('click', function(){
+        if (!requireAdmin()) return;
+        loadAdminDashboard();
+        addAudit('Admin refreshed dashboard data');
+    });
+    document.getElementById('adminExportPayments')?.addEventListener('click', capstoneExportPayments);
+    document.getElementById('adminFocusStudents')?.addEventListener('click', function(){
+        document.getElementById('adminStudentsSection')?.scrollIntoView({behavior:'smooth'});
+    });
+    document.getElementById('adminFocusPayments')?.addEventListener('click', function(){
+        document.getElementById('adminPaymentsSection')?.scrollIntoView({behavior:'smooth'});
+    });
+    document.getElementById('adminOpenAnnouncements')?.addEventListener('click', openAnnouncementModal);
+    document.getElementById('closeAnnouncement')?.addEventListener('click', ()=>hide(document.getElementById('announcementModal')));
+    document.getElementById('cancelAnnouncement')?.addEventListener('click', ()=>hide(document.getElementById('announcementModal')));
+    document.getElementById('announcementModal')?.addEventListener('click', e => {
+        if (e.target.id === 'announcementModal') hide(e.target);
+    });
+    document.getElementById('announcementForm')?.addEventListener('submit', publishAnnouncement);
+
+    document.getElementById('addStudentButton')?.addEventListener('click', () => openStudentModal(null));
+    document.getElementById('closeStudentModal')?.addEventListener('click', closeStudentModal);
+    document.getElementById('cancelStudentModal')?.addEventListener('click', closeStudentModal);
+    document.getElementById('studentForm')?.addEventListener('submit', saveStudent);
+    document.getElementById('closeResetPasswordModal')?.addEventListener('click', () => hide(document.getElementById('resetPasswordModal')));
+    document.getElementById('cancelResetPassword')?.addEventListener('click', () => hide(document.getElementById('resetPasswordModal')));
+    document.getElementById('resetPasswordForm')?.addEventListener('submit', resetStudentPassword);
+
+
+    renderStudentAnnouncements();
+
+    document.getElementById('userPaymentSearch')?.addEventListener('input', function(){
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('#paymentHistoryBody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    });
+
+    console.log('AI Student Management System loaded successfully.');
+});
+</script>
+
+</body>
+</html>
